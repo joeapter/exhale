@@ -127,7 +127,7 @@ export default function HomeAtmosphere() {
         </div>
       </div>
 
-      {/* Below panel — dual column story text */}
+      {/* Below panel — asymmetric editorial text */}
       <div
         className="relative"
         style={{
@@ -137,25 +137,25 @@ export default function HomeAtmosphere() {
         }}
       >
         <div
-          className="max-w-[1180px] mx-auto grid md:grid-cols-2 gap-12 md:gap-20 items-start"
+          className="max-w-[1180px] mx-auto grid md:grid-cols-12"
           style={{ paddingLeft: "var(--gutter)", paddingRight: "var(--gutter)" }}
         >
-          <div>
+          {/* Primary text — wide left column */}
+          <div className="md:col-span-7 md:col-start-1 mb-14 md:mb-0">
             <h3
               style={{
                 fontFamily: "Cormorant Garamond, Georgia, serif",
                 fontWeight: 300,
-                fontSize: "clamp(1.625rem, 2.5vw, 2.25rem)",
-                lineHeight: 1.2,
+                fontSize: "clamp(1.75rem, 3vw, 2.5rem)",
+                lineHeight: 1.15,
                 color: "var(--color-espresso)",
-                marginBottom: "1.25rem",
+                marginBottom: "1.5rem",
               }}
             >
               Not a program.
-              <br />
-              <span style={{ fontStyle: "italic" }}>An atmosphere.</span>
+              <em style={{ fontStyle: "italic" }}> An atmosphere.</em>
             </h3>
-            <p className="prose-exhale">
+            <p className="prose-exhale" style={{ maxWidth: "52ch" }}>
               EXHALE is not a schedule of workshops. It is a carefully held
               space. There are invitations — to move, to gather, to reflect —
               but nothing is required of you except your presence. You are
@@ -164,27 +164,34 @@ export default function HomeAtmosphere() {
             </p>
           </div>
 
-          <div>
-            <h3
+          {/* Secondary — offset right, sits lower */}
+          <div
+            className="md:col-span-4 md:col-start-9"
+            style={{ paddingTop: "clamp(2rem, 4vw, 4rem)" }}
+          >
+            <div
+              style={{
+                width: "1px",
+                height: "2.5rem",
+                background: "var(--color-clay)",
+                opacity: 0.3,
+                marginBottom: "1.5rem",
+              }}
+            />
+            <p
               style={{
                 fontFamily: "Cormorant Garamond, Georgia, serif",
+                fontStyle: "italic",
                 fontWeight: 300,
-                fontSize: "clamp(1.625rem, 2.5vw, 2.25rem)",
-                lineHeight: 1.2,
-                color: "var(--color-espresso)",
-                marginBottom: "1.25rem",
+                fontSize: "clamp(1.125rem, 1.6vw, 1.375rem)",
+                lineHeight: 1.55,
+                color: "var(--color-taupe)",
               }}
             >
-              Built around
-              <br />
-              <span style={{ fontStyle: "italic" }}>women's rhythms.</span>
-            </h3>
-            <p className="prose-exhale">
-              We understand that women carry a lot. We know how rarely
-              rest is truly prioritized. Every decision at EXHALE — the
-              pacing, the food, the programming, the sleeping arrangement —
-              has been made with awareness of that reality, and with genuine
-              care for what it takes to truly let go.
+              Every decision at EXHALE — the pacing, the food, the programming,
+              the sleeping arrangement — has been made with awareness of what
+              women actually need, and with genuine care for what it takes to
+              truly let go.
             </p>
           </div>
         </div>

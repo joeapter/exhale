@@ -219,7 +219,7 @@ export default async function RetreatsPage() {
                     </div>
 
                     {/* Price + CTA */}
-                    <div className="md:col-span-3 md:col-start-9 md:text-right flex flex-col md:items-end gap-4">
+                    <div className="md:col-span-3 md:col-start-9 md:text-right flex flex-col md:items-end gap-5">
                       <div>
                         <div className="label-sm text-[#9B8F84] mb-1">From</div>
                         <div
@@ -236,40 +236,38 @@ export default async function RetreatsPage() {
                         <div className="label-sm text-[#9B8F84] mt-1">per person</div>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <Link
-                          href={`/retreats/${retreat.slug}`}
-                          className="inline-flex items-center justify-center px-6 py-2.5 transition-all duration-300"
-                          style={{
-                            fontFamily: "Jost, system-ui, sans-serif",
-                            fontWeight: 400,
-                            fontSize: "0.75rem",
-                            letterSpacing: "0.16em",
-                            textTransform: "uppercase",
-                            border: "1px solid rgba(184,144,128,0.5)",
-                            color: "var(--color-espresso)",
-                          }}
-                        >
-                          View Details
-                        </Link>
-
+                      <div className="flex flex-col md:items-end gap-3">
                         {!isSoldOut && (
                           <Link
                             href={`/register/${retreat.slug}`}
-                            className="inline-flex items-center justify-center px-6 py-2.5 transition-all duration-300"
                             style={{
                               fontFamily: "Jost, system-ui, sans-serif",
                               fontWeight: 400,
                               fontSize: "0.75rem",
-                              letterSpacing: "0.16em",
+                              letterSpacing: "0.2em",
                               textTransform: "uppercase",
-                              background: "var(--color-espresso)",
-                              color: "#FAF7F2",
+                              color: "var(--color-espresso)",
+                              borderBottom: "1px solid rgba(61,46,34,0.4)",
+                              paddingBottom: "2px",
+                              transition: "border-color 0.3s ease",
                             }}
                           >
                             Reserve a Place
                           </Link>
                         )}
+                        <Link
+                          href={`/retreats/${retreat.slug}`}
+                          style={{
+                            fontFamily: "Jost, system-ui, sans-serif",
+                            fontWeight: 300,
+                            fontSize: "0.8125rem",
+                            color: "var(--color-taupe-light)",
+                            letterSpacing: "0.05em",
+                            transition: "color 0.3s ease",
+                          }}
+                        >
+                          View details
+                        </Link>
                       </div>
                     </div>
                   </div>

@@ -4,233 +4,234 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 
 export default function HomeHero() {
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const elements = [titleRef.current, subRef.current, ctaRef.current];
-    elements.forEach((el, i) => {
-      if (!el) return;
-      el.style.opacity = "0";
-      el.style.transform = "translateY(20px)";
+    const el = contentRef.current;
+    if (!el) return;
+    const children = Array.from(el.children) as HTMLElement[];
+    children.forEach((child, i) => {
+      child.style.opacity = "0";
+      child.style.transform = "translateY(18px)";
       setTimeout(() => {
-        if (!el) return;
-        el.style.transition = "opacity 1.2s cubic-bezier(0.25,0.46,0.45,0.94), transform 1.2s cubic-bezier(0.25,0.46,0.45,0.94)";
-        el.style.opacity = "1";
-        el.style.transform = "translateY(0)";
-      }, 300 + i * 200);
+        child.style.transition = `opacity 1.4s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 160}ms, transform 1.4s cubic-bezier(0.25,0.46,0.45,0.94) ${i * 160}ms`;
+        child.style.opacity = "1";
+        child.style.transform = "translateY(0)";
+      }, 200 + i * 160);
     });
   }, []);
 
   return (
     <section
       className="relative min-h-screen flex flex-col justify-end overflow-hidden grain-overlay"
-      style={{ background: "linear-gradient(165deg, #E8DDD0 0%, #D4C5B0 40%, #C4A898 100%)" }}
+      aria-label="EXHALE — Desert escape for women"
     >
-      {/* Desert landscape illustration — CSS-composed atmospheric layers */}
-      <div className="absolute inset-0 overflow-hidden" aria-hidden>
-        {/* Sky gradient */}
+      {/* ── Atmospheric desert background ── */}
+      <div className="absolute inset-0" aria-hidden>
+        {/* Sky — warm dawn palette */}
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(180deg, #F0E8DC 0%, #E4D4C0 35%, #D8C4A8 65%, #C8B094 100%)",
+            background: "linear-gradient(180deg, #EEE4D4 0%, #E2CEB6 28%, #D4B898 55%, #C4A080 78%, #B08860 100%)",
           }}
         />
 
-        {/* Sun haze */}
+        {/* Distant sun haze — off-centre for asymmetry */}
         <div
           className="absolute"
           style={{
-            top: "8%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "min(60vw, 500px)",
-            height: "min(60vw, 500px)",
+            top: "4%",
+            left: "42%",
+            width: "clamp(280px, 52vw, 560px)",
+            height: "clamp(280px, 52vw, 560px)",
             borderRadius: "50%",
-            background: "radial-gradient(ellipse, rgba(220,170,100,0.35) 0%, rgba(220,170,100,0.12) 40%, transparent 70%)",
-            filter: "blur(40px)",
+            background: "radial-gradient(ellipse, rgba(224,172,96,0.4) 0%, rgba(224,172,96,0.15) 35%, transparent 65%)",
+            filter: "blur(48px)",
+            transform: "translateX(-50%)",
           }}
         />
 
-        {/* Distant dune silhouette — back layer */}
-        <div
-          className="absolute bottom-0 left-0 right-0"
-          style={{
-            height: "55%",
-            background: "linear-gradient(180deg, transparent 0%, rgba(184,148,120,0.15) 30%, rgba(160,124,96,0.4) 100%)",
-          }}
-        />
-
-        {/* Dune shape left */}
-        <div
-          className="absolute bottom-0"
-          style={{
-            left: "-5%",
-            width: "55%",
-            height: "42%",
-            background: "linear-gradient(135deg, rgba(196,168,144,0.0) 0%, rgba(180,148,120,0.55) 100%)",
-            borderRadius: "50% 80% 0 0",
-            filter: "blur(1px)",
-          }}
-        />
-
-        {/* Dune shape right */}
-        <div
-          className="absolute bottom-0"
-          style={{
-            right: "-8%",
-            width: "50%",
-            height: "38%",
-            background: "linear-gradient(225deg, rgba(196,168,144,0.0) 0%, rgba(172,140,112,0.6) 100%)",
-            borderRadius: "80% 50% 0 0",
-            filter: "blur(1px)",
-          }}
-        />
-
-        {/* Atmospheric haze band */}
+        {/* Mid-horizon heat shimmer */}
         <div
           className="absolute"
           style={{
-            bottom: "38%",
+            top: "45%",
             left: 0,
             right: 0,
-            height: "12%",
-            background: "linear-gradient(180deg, transparent 0%, rgba(228,216,200,0.25) 50%, transparent 100%)",
-            filter: "blur(8px)",
+            height: "8%",
+            background: "linear-gradient(180deg, transparent 0%, rgba(232,212,180,0.3) 50%, transparent 100%)",
+            filter: "blur(12px)",
           }}
         />
 
-        {/* Tent silhouette suggestion — subtle */}
+        {/* Dune — far left, large, soft */}
         <div
-          className="absolute"
+          className="absolute bottom-0"
           style={{
-            bottom: "38%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            width: "2px",
-            height: "12%",
-            background: "rgba(96,72,52,0.2)",
-          }}
-        />
-        <div
-          className="absolute"
-          style={{
-            bottom: "38%",
-            left: "calc(50% - 6%)",
-            width: "12%",
-            height: "9%",
-            background: "rgba(96,72,52,0.12)",
-            clipPath: "polygon(50% 0%, 0% 100%, 100% 100%)",
-            filter: "blur(0.5px)",
+            left: "-12%",
+            width: "58%",
+            height: "46%",
+            background: "radial-gradient(ellipse 80% 80% at 60% 100%, rgba(168,136,104,0.7) 0%, rgba(152,120,88,0.3) 60%, transparent 100%)",
+            borderRadius: "60% 90% 0 0",
+            filter: "blur(2px)",
           }}
         />
 
-        {/* Soft bottom fade into content overlay */}
+        {/* Dune — right, slightly in front */}
+        <div
+          className="absolute bottom-0"
+          style={{
+            right: "-6%",
+            width: "48%",
+            height: "38%",
+            background: "radial-gradient(ellipse 80% 80% at 40% 100%, rgba(156,124,92,0.65) 0%, rgba(140,108,76,0.25) 60%, transparent 100%)",
+            borderRadius: "90% 60% 0 0",
+            filter: "blur(1.5px)",
+          }}
+        />
+
+        {/* Ground plane */}
         <div
           className="absolute bottom-0 left-0 right-0"
           style={{
-            height: "50%",
-            background: "linear-gradient(180deg, transparent 0%, rgba(61,46,34,0.55) 100%)",
+            height: "28%",
+            background: "linear-gradient(180deg, transparent 0%, rgba(100,72,48,0.45) 100%)",
+          }}
+        />
+
+        {/* Tent silhouette — very subtle, off-centre */}
+        <div
+          className="absolute"
+          style={{
+            bottom: "27%",
+            left: "54%",
+            width: "0",
+            height: "0",
+            borderLeft: "6vw solid transparent",
+            borderRight: "6vw solid transparent",
+            borderBottom: "8vw solid rgba(72,52,34,0.14)",
+            filter: "blur(1px)",
+          }}
+        />
+
+        {/* Veil — gradient from dark earth to transparent, bottom half */}
+        <div
+          className="absolute bottom-0 left-0 right-0"
+          style={{
+            height: "60%",
+            background: "linear-gradient(180deg, transparent 0%, rgba(48,34,20,0.62) 100%)",
           }}
         />
       </div>
 
-      {/* Content */}
+      {/* ── Content ── */}
       <div
-        className="relative z-10 w-full max-w-[1180px] mx-auto pb-20 md:pb-28"
-        style={{ paddingLeft: "var(--gutter)", paddingRight: "var(--gutter)" }}
+        className="relative z-10 w-full max-w-[1180px] mx-auto"
+        style={{
+          paddingLeft: "var(--gutter)",
+          paddingRight: "var(--gutter)",
+          paddingBottom: "clamp(4rem, 8vw, 7rem)",
+        }}
       >
-        <div className="max-w-2xl">
-          {/* Label */}
-          <div className="flex items-center gap-3 mb-8">
-            <span className="block h-px w-5" style={{ background: "rgba(228,216,200,0.55)" }} />
-            <span
-              className="label-sm"
-              style={{ color: "rgba(228,216,200,0.8)" }}
-            >
-              Desert Escape for Women · Israel
-            </span>
-          </div>
+        <div ref={contentRef} className="max-w-[26ch] md:max-w-[32ch]">
 
-          {/* Title */}
+          {/* Eyebrow */}
+          <p
+            className="label-sm mb-10"
+            style={{ color: "rgba(228,210,185,0.65)" }}
+          >
+            Desert Escape for Women &nbsp;·&nbsp; Israel
+          </p>
+
+          {/* Main headline */}
           <h1
-            ref={titleRef}
-            className="text-[#FAF7F2] mb-6"
             style={{
               fontFamily: "Cormorant Garamond, Georgia, serif",
               fontWeight: 300,
-              fontSize: "clamp(3.5rem, 9vw, 7.5rem)",
-              lineHeight: 1.0,
-              letterSpacing: "-0.02em",
+              fontSize: "clamp(4rem, 10vw, 8.5rem)",
+              lineHeight: 0.95,
+              letterSpacing: "-0.025em",
+              color: "#FAF7F2",
+              marginBottom: "clamp(1.5rem, 3vw, 2.5rem)",
             }}
           >
             Exhale.
             <br />
-            <span style={{ fontStyle: "italic", fontWeight: 300, opacity: 0.88 }}>
+            <em
+              style={{
+                fontStyle: "italic",
+                fontWeight: 300,
+                color: "rgba(250,247,242,0.82)",
+              }}
+            >
               Finally.
-            </span>
+            </em>
           </h1>
 
-          {/* Subheading */}
+          {/* Subtext */}
           <p
-            ref={subRef}
             style={{
               fontFamily: "Jost, system-ui, sans-serif",
               fontWeight: 300,
-              fontSize: "clamp(0.9375rem, 1.5vw, 1.0625rem)",
-              color: "rgba(250,247,242,0.75)",
-              lineHeight: 1.8,
-              maxWidth: "38ch",
-              marginBottom: "2.5rem",
+              fontSize: "clamp(0.875rem, 1.4vw, 1rem)",
+              color: "rgba(240,224,200,0.72)",
+              lineHeight: 1.85,
+              maxWidth: "36ch",
+              marginBottom: "clamp(2rem, 4vw, 3rem)",
             }}
           >
-            A women-only retreat in the Israeli desert. Three days of genuine
-            rest, nourishing meals, open sky, and the kind of quiet you
-            forgot existed.
+            A women-only retreat in the Israeli desert.
+            Three days of genuine rest, nourishing meals,
+            open sky, and the kind of quiet you forgot existed.
           </p>
 
-          {/* CTAs */}
-          <div ref={ctaRef} className="flex flex-wrap items-center gap-4">
+          {/* CTA pair */}
+          <div className="flex flex-wrap items-baseline gap-x-8 gap-y-4">
             <Link
               href="/retreats"
-              className="inline-flex items-center gap-3 px-7 py-3.5 transition-all duration-300 uppercase"
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 400,
                 fontSize: "0.75rem",
-                letterSpacing: "0.18em",
-                background: "rgba(250,247,242,0.12)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(250,247,242,0.3)",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
                 color: "#FAF7F2",
+                borderBottom: "1px solid rgba(250,247,242,0.35)",
+                paddingBottom: "3px",
+                transition: "border-color 0.3s ease",
               }}
             >
-              See Upcoming Retreats
-              <span aria-hidden className="block h-px w-5" style={{ background: "rgba(250,247,242,0.6)" }} />
+              Upcoming retreats
             </Link>
-
             <Link
               href="/about"
-              className="inline-flex items-center label-sm transition-colors duration-300"
-              style={{ color: "rgba(250,247,242,0.6)" }}
+              style={{
+                fontFamily: "Jost, system-ui, sans-serif",
+                fontWeight: 300,
+                fontSize: "0.8125rem",
+                color: "rgba(240,224,200,0.5)",
+                letterSpacing: "0.05em",
+                transition: "color 0.3s ease",
+              }}
             >
-              Learn more
+              About EXHALE
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Scroll indicator */}
+      {/* ── Vertical scroll breath ── */}
       <div
-        className="absolute bottom-8 right-[var(--gutter)] z-10 flex flex-col items-center gap-2"
-        style={{ "--gutter": "clamp(1.5rem, 5vw, 4rem)" } as React.CSSProperties}
+        className="absolute bottom-10 left-1/2 z-10"
+        style={{ transform: "translateX(-50%)" }}
         aria-hidden
       >
         <div
-          className="h-10 w-px"
           style={{
-            background: "linear-gradient(180deg, transparent 0%, rgba(250,247,242,0.4) 100%)",
+            width: "1px",
+            height: "3.5rem",
+            background: "linear-gradient(180deg, transparent 0%, rgba(250,247,242,0.3) 100%)",
+            animation: "softDrift 3s ease-in-out infinite",
           }}
         />
       </div>

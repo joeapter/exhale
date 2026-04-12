@@ -86,10 +86,10 @@ export default function HomeIntro() {
             <div className="mt-10">
               <a
                 href="/about"
-                className="inline-flex items-center gap-3 label-md text-[#7A6A5A] hover:text-[#3D2E22] transition-colors duration-300"
+                className="label-md text-[#7A6A5A] hover:text-[#3D2E22] transition-colors duration-300"
+                style={{ borderBottom: "1px solid rgba(122,106,90,0.35)", paddingBottom: "2px" }}
               >
                 Our story
-                <span className="block h-px w-6" style={{ background: "currentColor", opacity: 0.5 }} />
               </a>
             </div>
           </div>

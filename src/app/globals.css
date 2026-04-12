@@ -1,36 +1,42 @@
 @import "tailwindcss";
 
+/* ─── Google Fonts ─── */
+/* Loaded via layout.tsx <head> link tag */
+
 /* ─── CSS Custom Properties ─── */
 :root {
   /* Palette */
-  --color-linen: #FAF7F2;
-  --color-sand: #F5EFE7;
-  --color-dune: #E4D8C9;
-  --color-stone: #C9BAA8;
-  --color-clay: #B89080;
-  --color-smoke: #ECE8E1;
-  --color-mist: #F0EBE3;
-  --color-espresso: #3D2E22;
-  --color-taupe: #7A6A5A;
+  --color-linen:       #FAF7F2;
+  --color-sand:        #F5EFE7;
+  --color-dune:        #E8DDD0;
+  --color-stone:       #C9BAA8;
+  --color-clay:        #B89080;
+  --color-smoke:       #ECE8E1;
+  --color-mist:        #F0EBE3;
+  --color-espresso:    #3D2E22;
+  --color-taupe:       #7A6A5A;
   --color-taupe-light: #9B8F84;
-  --color-candle: #D4956A;
-  --color-warm-white: #FDFAF6;
+  --color-candle:      #C8845A;
+  --color-warm-white:  #FDFAF6;
 
-  /* Spacing rhythm */
-  --section: clamp(5rem, 10vw, 9rem);
-  --section-sm: clamp(3rem, 6vw, 5rem);
-  --gutter: clamp(1.5rem, 5vw, 4rem);
+  /* Section rhythm */
+  --section:    clamp(5.5rem, 11vw, 10rem);
+  --section-sm: clamp(3rem,   6vw,  5.5rem);
+  --gutter:     clamp(1.5rem, 5vw,  4.5rem);
+
+  /* Easing */
+  --ease-drift: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── Base reset ─── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* ─── Base ─── */
+*, *::before, *::after { box-sizing: border-box; }
 
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -39,70 +45,64 @@ body {
   font-family: "Jost", system-ui, sans-serif;
   font-weight: 300;
   font-size: 1rem;
-  line-height: 1.7;
+  line-height: 1.75;
+  overflow-x: hidden;
 }
 
-/* ─── Typography ─── */
+/* ─── Typography reset ─── */
 h1, h2, h3, h4, h5, h6 {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-weight: 300;
   color: var(--color-espresso);
-  line-height: 1.1;
-  letter-spacing: -0.01em;
+  line-height: 1.08;
+  letter-spacing: -0.015em;
   margin: 0;
 }
 
 p {
   font-family: "Jost", system-ui, sans-serif;
   font-weight: 300;
-  line-height: 1.75;
+  line-height: 1.8;
   color: var(--color-taupe);
   margin: 0;
 }
 
-/* ─── Links ─── */
-a {
-  color: inherit;
-  text-decoration: none;
-}
+a { color: inherit; text-decoration: none; }
 
-/* ─── Selection ─── */
+img, video { max-width: 100%; display: block; }
+
 ::selection {
   background: var(--color-dune);
   color: var(--color-espresso);
 }
 
 /* ─── Scrollbar ─── */
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar       { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--color-linen); }
-::-webkit-scrollbar-thumb { background: var(--color-stone); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--color-stone); border-radius: 2px; }
 
 /* ─── Grain overlay ─── */
+.grain-overlay { position: relative; }
 .grain-overlay::after {
   content: "";
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 300px;
   mix-blend-mode: multiply;
-  z-index: 1;
+  z-index: 2;
 }
 
-/* ─── Type utilities ─── */
-.text-display {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-weight: 300;
-  letter-spacing: -0.01em;
+/* ─── Label / eyebrow styles ─── */
+.label-xs {
+  font-family: "Jost", system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
-
-.text-display-italic {
-  font-family: "Cormorant Garamond", Georgia, serif;
-  font-style: italic;
-  font-weight: 300;
-}
-
 .label-sm {
   font-family: "Jost", system-ui, sans-serif;
   font-size: 0.6875rem;
@@ -110,7 +110,6 @@ a {
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
-
 .label-md {
   font-family: "Jost", system-ui, sans-serif;
   font-size: 0.75rem;
@@ -119,73 +118,115 @@ a {
   text-transform: uppercase;
 }
 
-/* ─── Soft divider ─── */
-.divider-soft {
-  width: 3rem;
+/* ─── Eyebrow block (label + rule) ─── */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.eyebrow::before {
+  content: "";
+  display: block;
+  width: 1.5rem;
   height: 1px;
   background: var(--color-clay);
-  opacity: 0.5;
+  opacity: 0.55;
+  flex-shrink: 0;
 }
 
-/* ─── Form base ─── */
-.field-base {
-  font-family: "Jost", system-ui, sans-serif;
-  font-weight: 300;
-  font-size: 0.9375rem;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--color-stone);
-  color: var(--color-espresso);
-  padding: 0.625rem 0;
+/* ─── Section divider ─── */
+.rule-soft {
   width: 100%;
-  transition: border-color 0.3s ease;
-  outline: none;
-  border-radius: 0;
-  -webkit-appearance: none;
-}
-
-.field-base::placeholder {
-  color: var(--color-taupe-light);
-  font-weight: 300;
-}
-
-.field-base:focus {
-  border-bottom-color: var(--color-clay);
-}
-
-/* ─── Animate on scroll ─── */
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes revealFade {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-.animate-reveal {
-  animation: revealUp 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-.animate-fade {
-  animation: revealFade 1.2s ease forwards;
+  height: 1px;
+  background: rgba(184, 144, 128, 0.18);
+  border: none;
 }
 
 /* ─── Prose ─── */
 .prose-exhale {
   font-family: "Jost", system-ui, sans-serif;
   font-weight: 300;
-  font-size: 1.0625rem;
-  line-height: 1.85;
+  font-size: clamp(0.9375rem, 1.2vw, 1.0625rem);
+  line-height: 1.9;
   color: var(--color-taupe);
 }
+.prose-exhale p + p { margin-top: 1.5em; }
 
-.prose-exhale p + p {
-  margin-top: 1.4em;
+/* ─── Serif display helpers ─── */
+.serif {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 300;
+}
+.serif-italic {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
 }
 
-/* ─── Section spacing ─── */
-.py-section { padding-top: var(--section); padding-bottom: var(--section); }
+/* ─── Form fields ─── */
+.field-base {
+  font-family: "Jost", system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 0.9375rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(184, 144, 128, 0.4);
+  color: var(--color-espresso);
+  padding: 0.75rem 0;
+  width: 100%;
+  transition: border-color 0.35s var(--ease-gentle);
+  outline: none;
+  border-radius: 0;
+  -webkit-appearance: none;
+  letter-spacing: 0.01em;
+}
+.field-base::placeholder {
+  color: var(--color-taupe-light);
+  opacity: 0.7;
+}
+.field-base:focus {
+  border-bottom-color: var(--color-clay);
+}
+
+/* ─── Soft CTA link ─── */
+.link-underline {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: opacity 0.3s ease;
+}
+.link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+  transition: opacity 0.3s ease;
+}
+.link-underline:hover::after { opacity: 0.7; }
+
+/* ─── Keyframes ─── */
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes revealFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes softDrift {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-6px); }
+}
+
+.animate-reveal { animation: revealUp   0.95s var(--ease-drift)  forwards; }
+.animate-fade   { animation: revealFade 1.2s  ease                forwards; }
+
+/* ─── Section spacing helpers ─── */
+.py-section    { padding-top: var(--section);    padding-bottom: var(--section); }
 .py-section-sm { padding-top: var(--section-sm); padding-bottom: var(--section-sm); }
-.px-gutter { padding-left: var(--gutter); padding-right: var(--gutter); }
+.px-gutter     { padding-left: var(--gutter);    padding-right: var(--gutter); }

@@ -20,6 +20,12 @@ type Retreat = {
 
 type Step = 1 | 2 | 3;
 
+const stepLabels: Record<Step, string> = {
+  1: "Package",
+  2: "Your details",
+  3: "Wellness notes",
+};
+
 export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
@@ -81,7 +87,6 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
         throw new Error(data.error ?? "Something went wrong. Please try again.");
       }
 
-      // Redirect to Stripe checkout
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl;
       }
@@ -110,7 +115,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
   const labelStyle = {
     fontFamily: "Jost, system-ui, sans-serif",
     fontWeight: 400,
-    fontSize: "0.7rem",
+    fontSize: "0.6875rem",
     letterSpacing: "0.16em",
     textTransform: "uppercase" as const,
     color: "var(--color-taupe-light)",
@@ -118,60 +123,32 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
     marginBottom: "0.25rem",
   };
 
-  const stepTitles: Record<Step, string> = {
-    1: "Package",
-    2: "Your Details",
-    3: "Health & Preferences",
-  };
-
   return (
     <div>
-      {/* Progress */}
-      <div className="flex items-center gap-0 mb-12">
-        {([1, 2, 3] as Step[]).map((s, i) => (
-          <div key={s} className="flex items-center">
-            <div className="flex flex-col items-center">
-              <div
-                className="flex items-center justify-center"
-                style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "50%",
-                  background: step >= s ? "var(--color-espresso)" : "transparent",
-                  border: `1px solid ${step >= s ? "var(--color-espresso)" : "rgba(184,144,128,0.4)"}`,
-                  transition: "all 0.3s ease",
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: "Jost, system-ui, sans-serif",
-                    fontWeight: 300,
-                    fontSize: "0.6875rem",
-                    color: step >= s ? "#FAF7F2" : "var(--color-taupe-light)",
-                  }}
-                >
-                  {s}
-                </span>
-              </div>
-              <span
-                className="mt-1.5 label-sm"
-                style={{ color: step >= s ? "var(--color-taupe)" : "var(--color-taupe-light)" }}
-              >
-                {stepTitles[s]}
-              </span>
-            </div>
-            {i < 2 && (
-              <div
-                className="mx-3 mb-5"
-                style={{
-                  height: "1px",
-                  width: "3rem",
-                  background: step > s ? "var(--color-clay)" : "rgba(184,144,128,0.25)",
-                  transition: "background 0.3s ease",
-                }}
-              />
-            )}
-          </div>
+      {/* ── Step indicator — editorial text, not circles ── */}
+      <div className="flex items-center gap-6 mb-12">
+        {([1, 2, 3] as Step[]).map((s) => (
+          <span
+            key={s}
+            style={{
+              fontFamily: "Jost, system-ui, sans-serif",
+              fontWeight: step === s ? 400 : 300,
+              fontSize: "0.6875rem",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color:
+                step === s
+                  ? "var(--color-espresso)"
+                  : step > s
+                  ? "var(--color-taupe-light)"
+                  : "rgba(155,143,132,0.45)",
+              borderBottom: step === s ? "1px solid var(--color-clay)" : "none",
+              paddingBottom: step === s ? "2px" : 0,
+              transition: "all 0.3s ease",
+            }}
+          >
+            {stepLabels[s]}
+          </span>
         ))}
       </div>
 
@@ -192,83 +169,106 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               Choose your accommodation
             </h2>
 
-            {/* Package options */}
-            <div className="space-y-4 mb-10">
-              {retreat.packages.map((pkg) => (
-                <label
-                  key={pkg.id}
-                  className="flex items-start gap-4 cursor-pointer"
+            {/* Package options — editorial rows, not boxes */}
+            <div className="mb-10">
+              {retreat.packages.map((p, i) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => p.available > 0 && setSelectedPackage(p.id)}
+                  disabled={p.available === 0}
+                  className="w-full text-left"
                   style={{
-                    padding: "1.5rem",
-                    border: `1px solid ${
-                      selectedPackage === pkg.id
-                        ? "rgba(184,144,128,0.6)"
-                        : "rgba(184,144,128,0.25)"
-                    }`,
-                    background: selectedPackage === pkg.id ? "rgba(184,144,128,0.06)" : "transparent",
-                    transition: "all 0.2s ease",
-                    opacity: pkg.available === 0 ? 0.45 : 1,
+                    borderTop: i === 0 ? "1px solid rgba(184,144,128,0.2)" : "none",
+                    borderBottom: "1px solid rgba(184,144,128,0.2)",
+                    padding: "1.25rem 0",
+                    opacity: p.available === 0 ? 0.4 : 1,
+                    cursor: p.available === 0 ? "not-allowed" : "pointer",
+                    background: "none",
+                    transition: "opacity 0.2s ease",
                   }}
                 >
-                  <input
-                    type="radio"
-                    name="package"
-                    value={pkg.id}
-                    checked={selectedPackage === pkg.id}
-                    onChange={() => setSelectedPackage(pkg.id)}
-                    disabled={pkg.available === 0}
-                    className="mt-1 shrink-0"
-                    style={{ accentColor: "var(--color-clay)" }}
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <div
-                          style={{
-                            fontFamily: "Cormorant Garamond, Georgia, serif",
-                            fontWeight: 400,
-                            fontSize: "1.25rem",
-                            color: "var(--color-espresso)",
-                          }}
-                        >
-                          {pkg.name}
-                        </div>
-                        {pkg.available === 0 && (
-                          <span className="label-sm" style={{ color: "var(--color-taupe-light)" }}>
-                            Sold out
-                          </span>
-                        )}
-                        {pkg.available > 0 && pkg.available <= 2 && (
-                          <span className="label-sm" style={{ color: "var(--color-candle)" }}>
-                            {pkg.available} remaining
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-right shrink-0">
-                        <div
-                          style={{
-                            fontFamily: "Cormorant Garamond, Georgia, serif",
-                            fontWeight: 300,
-                            fontSize: "1.375rem",
-                            color: "var(--color-espresso)",
-                            lineHeight: 1,
-                          }}
-                        >
-                          {formatCurrency(pkg.fullPrice)}
-                        </div>
-                        <div className="label-sm text-[#9B8F84] mt-0.5">full price</div>
-                      </div>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <div className="flex items-baseline gap-4">
+                      {/* Selection dot */}
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: "6px",
+                          height: "6px",
+                          borderRadius: "50%",
+                          background:
+                            selectedPackage === p.id
+                              ? "var(--color-clay)"
+                              : "transparent",
+                          border: `1px solid ${
+                            selectedPackage === p.id
+                              ? "var(--color-clay)"
+                              : "rgba(184,144,128,0.5)"
+                          }`,
+                          flexShrink: 0,
+                          marginBottom: "1px",
+                          transition: "all 0.2s ease",
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontFamily: "Cormorant Garamond, Georgia, serif",
+                          fontWeight: selectedPackage === p.id ? 400 : 300,
+                          fontSize: "clamp(1.125rem, 1.8vw, 1.375rem)",
+                          color:
+                            selectedPackage === p.id
+                              ? "var(--color-espresso)"
+                              : "var(--color-taupe)",
+                          transition: "color 0.2s ease",
+                        }}
+                      >
+                        {p.name}
+                      </span>
+                      {p.available === 0 && (
+                        <span className="label-sm" style={{ color: "var(--color-taupe-light)" }}>
+                          Sold out
+                        </span>
+                      )}
+                      {p.available > 0 && p.available <= 2 && (
+                        <span className="label-sm" style={{ color: "var(--color-candle)" }}>
+                          {p.available} remaining
+                        </span>
+                      )}
                     </div>
+                    <span
+                      style={{
+                        fontFamily: "Cormorant Garamond, Georgia, serif",
+                        fontWeight: 300,
+                        fontSize: "clamp(1.125rem, 1.6vw, 1.25rem)",
+                        color: "var(--color-taupe)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {formatCurrency(p.fullPrice)}
+                    </span>
                   </div>
-                </label>
+                </button>
               ))}
             </div>
 
             {/* Payment type */}
             {pkg && (
               <div className="mb-10">
-                <div className="label-sm text-[#B89080] mb-4">Payment option</div>
-                <div className="space-y-3">
+                <div
+                  style={{
+                    fontFamily: "Jost, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: "0.6875rem",
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--color-taupe-light)",
+                    marginBottom: "1.25rem",
+                  }}
+                >
+                  Payment option
+                </div>
+                <div className="space-y-5">
                   {[
                     {
                       value: "DEPOSIT" as const,
@@ -281,43 +281,60 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                       sublabel: `${formatCurrency(pkg.fullPrice)} — no further payment required`,
                     },
                   ].map((option) => (
-                    <label
+                    <button
                       key={option.value}
-                      className="flex items-start gap-3 cursor-pointer"
+                      type="button"
+                      onClick={() => setPaymentType(option.value)}
+                      className="w-full text-left"
+                      style={{ background: "none", padding: 0, cursor: "pointer" }}
                     >
-                      <input
-                        type="radio"
-                        name="paymentType"
-                        value={option.value}
-                        checked={paymentType === option.value}
-                        onChange={() => setPaymentType(option.value)}
-                        className="mt-0.5 shrink-0"
-                        style={{ accentColor: "var(--color-clay)" }}
-                      />
-                      <div>
-                        <div
+                      <div className="flex items-baseline gap-4">
+                        <span
                           style={{
-                            fontFamily: "Jost, system-ui, sans-serif",
-                            fontWeight: 300,
-                            fontSize: "0.9375rem",
-                            color: "var(--color-espresso)",
+                            display: "inline-block",
+                            width: "6px",
+                            height: "6px",
+                            borderRadius: "50%",
+                            background:
+                              paymentType === option.value
+                                ? "var(--color-clay)"
+                                : "transparent",
+                            border: `1px solid ${
+                              paymentType === option.value
+                                ? "var(--color-clay)"
+                                : "rgba(184,144,128,0.5)"
+                            }`,
+                            flexShrink: 0,
+                            marginBottom: "1px",
+                            transition: "all 0.2s ease",
                           }}
-                        >
-                          {option.label}
-                        </div>
-                        <div
-                          style={{
-                            fontFamily: "Jost, system-ui, sans-serif",
-                            fontWeight: 300,
-                            fontSize: "0.8125rem",
-                            color: "var(--color-taupe-light)",
-                            marginTop: "0.1rem",
-                          }}
-                        >
-                          {option.sublabel}
+                        />
+                        <div>
+                          <div
+                            style={{
+                              fontFamily: "Jost, system-ui, sans-serif",
+                              fontWeight: paymentType === option.value ? 400 : 300,
+                              fontSize: "0.9375rem",
+                              color: "var(--color-espresso)",
+                              transition: "font-weight 0.2s ease",
+                            }}
+                          >
+                            {option.label}
+                          </div>
+                          <div
+                            style={{
+                              fontFamily: "Jost, system-ui, sans-serif",
+                              fontWeight: 300,
+                              fontSize: "0.8125rem",
+                              color: "var(--color-taupe-light)",
+                              marginTop: "0.15rem",
+                            }}
+                          >
+                            {option.sublabel}
+                          </div>
                         </div>
                       </div>
-                    </label>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -327,7 +344,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               type="button"
               onClick={() => setStep(2)}
               disabled={!selectedPackage}
-              className="w-full py-3.5 transition-all duration-300 uppercase disabled:opacity-50"
+              className="w-full py-4 transition-all duration-300 uppercase disabled:opacity-50"
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 400,
@@ -360,7 +377,6 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
             </h2>
 
             <div className="space-y-8">
-              {/* Name row */}
               <div className="grid grid-cols-2 gap-6">
                 <div>
                   <label style={labelStyle}>First name *</label>
@@ -422,7 +438,6 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                 />
               </div>
 
-              {/* Rooming preference */}
               <div>
                 <label style={labelStyle}>Rooming preference</label>
                 <select
@@ -433,13 +448,24 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                 >
                   <option value="NO_PREFERENCE">No preference</option>
                   <option value="SOLO">I prefer my own space</option>
-                  <option value="WITH_FRIEND">I'm coming with a friend (please pair us)</option>
+                  <option value="WITH_FRIEND">I&apos;m coming with a friend (please pair us)</option>
                 </select>
               </div>
 
-              {/* Emergency contact */}
               <div>
-                <div className="label-sm text-[#B89080] mb-5">Emergency contact</div>
+                <div
+                  style={{
+                    fontFamily: "Jost, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: "0.6875rem",
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--color-taupe-light)",
+                    marginBottom: "1.5rem",
+                  }}
+                >
+                  Emergency contact
+                </div>
                 <div className="space-y-6">
                   <div>
                     <label style={labelStyle}>Name *</label>
@@ -484,7 +510,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="flex-1 py-3.5 transition-all duration-300 uppercase"
+                className="flex-1 py-4 transition-all duration-300 uppercase"
                 style={{
                   fontFamily: "Jost, system-ui, sans-serif",
                   fontWeight: 400,
@@ -508,7 +534,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   setError(null);
                   setStep(3);
                 }}
-                className="flex-[2] py-3.5 transition-all duration-300 uppercase"
+                className="flex-[2] py-4 transition-all duration-300 uppercase"
                 style={{
                   fontFamily: "Jost, system-ui, sans-serif",
                   fontWeight: 400,
@@ -531,7 +557,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
           </div>
         )}
 
-        {/* ─── Step 3: Health & Preferences ─── */}
+        {/* ─── Step 3: Wellness Notes ─── */}
         {step === 3 && (
           <div>
             <h2
@@ -595,34 +621,48 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               </div>
             </div>
 
-            {/* Summary */}
-            <div
-              className="mt-10 mb-8 p-5"
-              style={{ background: "rgba(184,144,128,0.08)", border: "1px solid rgba(184,144,128,0.2)" }}
-            >
-              <div className="label-sm text-[#B89080] mb-4">Booking Summary</div>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe)" }}>
+            {/* Summary — minimal, no box */}
+            <div className="mt-10 mb-8">
+              <div
+                style={{
+                  borderTop: "1px solid rgba(184,144,128,0.2)",
+                  paddingTop: "1.5rem",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "Jost, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: "0.6875rem",
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--color-taupe-light)",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Booking summary
+                </div>
+                <div className="flex justify-between items-baseline mb-2">
+                  <span style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.9375rem", color: "var(--color-taupe)" }}>
                     {retreat.title}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe)" }}>
+                <div className="flex justify-between items-baseline mb-5">
+                  <span style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.9375rem", color: "var(--color-taupe)" }}>
                     {pkg?.name}
                   </span>
-                  <span style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-espresso)" }}>
+                  <span style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.9375rem", color: "var(--color-espresso)" }}>
                     {pkg ? formatCurrency(pkg.fullPrice) : ""}
                   </span>
                 </div>
                 <div
-                  className="pt-3 flex justify-between"
-                  style={{ borderTop: "1px solid rgba(184,144,128,0.25)", marginTop: "0.5rem" }}
+                  className="flex justify-between items-baseline pt-4"
+                  style={{ borderTop: "1px solid rgba(184,144,128,0.2)" }}
                 >
-                  <span style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.875rem", color: "var(--color-espresso)" }}>
+                  <span style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.9375rem", color: "var(--color-espresso)" }}>
                     {paymentType === "DEPOSIT" ? "Deposit due today" : "Total due today"}
                   </span>
-                  <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontWeight: 300, fontSize: "1.25rem", color: "var(--color-espresso)" }}>
+                  <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontWeight: 300, fontSize: "1.375rem", color: "var(--color-espresso)" }}>
                     {formatCurrency(amountDue)}
                   </span>
                 </div>
@@ -642,7 +682,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="flex-1 py-3.5 transition-all duration-300 uppercase"
+                className="flex-1 py-4 transition-all duration-300 uppercase"
                 style={{
                   fontFamily: "Jost, system-ui, sans-serif",
                   fontWeight: 400,
@@ -659,7 +699,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-[2] py-3.5 transition-all duration-300 uppercase disabled:opacity-60"
+                className="flex-[2] py-4 transition-all duration-300 uppercase disabled:opacity-60"
                 style={{
                   fontFamily: "Jost, system-ui, sans-serif",
                   fontWeight: 400,
@@ -671,7 +711,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   cursor: loading ? "not-allowed" : "pointer",
                 }}
               >
-                {loading ? "Preparing checkout…" : `Proceed to Payment — ${formatCurrency(amountDue)}`}
+                {loading ? "Preparing checkout…" : `Reserve — ${formatCurrency(amountDue)}`}
               </button>
             </div>
 
@@ -679,7 +719,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               className="mt-4 text-center"
               style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}
             >
-              Payments processed securely by Stripe. You will be redirected to complete payment.
+              Payments processed securely by Stripe.
             </p>
           </div>
         )}

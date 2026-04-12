@@ -74,29 +74,34 @@ export default function HomeRetreatCTA() {
             Meals eaten slowly. Rest that actually lands. A few places remain.
           </p>
 
-          <div className="flex flex-wrap items-center gap-5">
+          <div className="flex flex-wrap items-baseline gap-x-8 gap-y-4">
             <Link
               href="/retreats/summer-escape-2026"
-              className="inline-flex items-center gap-3 px-7 py-3.5 transition-all duration-300 uppercase"
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 400,
                 fontSize: "0.75rem",
-                letterSpacing: "0.18em",
-                background: "rgba(250,247,242,0.1)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(250,247,242,0.25)",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
                 color: "#FAF7F2",
+                borderBottom: "1px solid rgba(250,247,242,0.35)",
+                paddingBottom: "3px",
+                transition: "border-color 0.3s ease",
               }}
             >
               View Retreat Details
-              <span className="h-px w-5 block" style={{ background: "rgba(250,247,242,0.5)" }} aria-hidden />
             </Link>
 
             <Link
               href="/retreats"
-              className="label-sm transition-colors duration-300"
-              style={{ color: "rgba(184,144,128,0.7)" }}
+              style={{
+                fontFamily: "Jost, system-ui, sans-serif",
+                fontWeight: 300,
+                fontSize: "0.8125rem",
+                color: "rgba(184,144,128,0.65)",
+                letterSpacing: "0.05em",
+                transition: "color 0.3s ease",
+              }}
             >
               All retreats
             </Link>

@@ -71,7 +71,8 @@ export default function Nav() {
           <div className="flex items-center gap-5">
             <Link
               href="/retreats"
-              className="hidden md:inline-flex items-center label-sm text-[#3D2E22] border border-[#B89080]/60 hover:border-[#B89080] hover:bg-[#B89080]/8 px-5 py-2.5 transition-all duration-300"
+              className="hidden md:inline-block label-sm text-[#3D2E22] hover:text-[#B89080] transition-colors duration-300"
+              style={{ borderBottom: "1px solid rgba(184,144,128,0.45)", paddingBottom: "2px" }}
             >
               Reserve a Place
             </Link>
