@@ -1,0 +1,278 @@
+// Exhale — Desert Escape for Women
+// Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────
+// AUTHENTICATION
+// ─────────────────────────────────────────────────────
+
+model AdminUser {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  password  String    // bcrypt hash
+  role      AdminRole @default(EDITOR)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+}
+
+// ─────────────────────────────────────────────────────
+// RETREATS
+// ─────────────────────────────────────────────────────
+
+model Retreat {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  status         RetreatStatus  @default(DRAFT)
+
+  // Content
+  title          String
+  tagline        String?
+  overview       String         @db.Text
+  philosophy     String?        @db.Text
+  location       String
+  locationDetail String?        @db.Text
+  itinerary      Json?
+  inclusions     String[]
+  exclusions     String[]
+  accommodations String?        @db.Text
+  dining         String?        @db.Text
+
+  // Dates & Capacity
+  startDate      DateTime
+  endDate        DateTime
+  capacity       Int
+  spotsRemaining Int
+
+  // Images
+  heroImage      String?
+  images         RetreatImage[]
+
+  // Packages
+  packages       RetreatPackage[]
+
+  // Relations
+  faqs           RetreatFaq[]
+  registrations  Registration[]
+
+  // Meta
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("retreats")
+}
+
+enum RetreatStatus {
+  DRAFT
+  PUBLISHED
+  SOLD_OUT
+  COMPLETED
+  CANCELED
+}
+
+model RetreatImage {
+  id        String   @id @default(cuid())
+  retreatId String
+  retreat   Retreat  @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  caption   String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("retreat_images")
+}
+
+model RetreatPackage {
+  id            String         @id @default(cuid())
+  retreatId     String
+  retreat       Retreat        @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?        @db.Text
+  fullPrice     Int
+  depositAmount Int
+  capacity      Int            @default(1)
+  available     Int
+  isActive      Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  registrations Registration[]
+
+  @@map("retreat_packages")
+}
+
+// ─────────────────────────────────────────────────────
+// REGISTRATIONS
+// ─────────────────────────────────────────────────────
+
+model Registration {
+  id              String             @id @default(cuid())
+  retreatId       String
+  retreat         Retreat            @relation(fields: [retreatId], references: [id])
+  packageId       String?
+  package         RetreatPackage?    @relation(fields: [packageId], references: [id])
+  status          RegistrationStatus @default(PENDING)
+
+  // Attendee
+  firstName       String
+  lastName        String
+  email           String
+  phone           String?
+  dateOfBirth     DateTime?
+
+  // Preferences
+  dietaryNeeds    String?            @db.Text
+  healthNotes     String?            @db.Text
+  roomingPref     RoomingPreference  @default(NO_PREFERENCE)
+  additionalNotes String?            @db.Text
+
+  // Emergency contact
+  emergencyName   String?
+  emergencyPhone  String?
+  emergencyRel    String?
+
+  // Payment
+  paymentType     PaymentType        @default(FULL)
+  payments        Payment[]
+  stripeSessionId String?
+  amountDue       Int
+  amountPaid      Int                @default(0)
+
+  // Confirmation
+  confirmedAt     DateTime?
+  confirmationRef String?            @unique
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@map("registrations")
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  WAITLISTED
+  CANCELED
+  REFUNDED
+}
+
+enum PaymentType {
+  DEPOSIT
+  FULL
+}
+
+enum RoomingPreference {
+  SOLO
+  WITH_FRIEND
+  NO_PREFERENCE
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  registrationId  String
+  registration    Registration  @relation(fields: [registrationId], references: [id])
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod @default(STRIPE)
+  amount          Int
+  currency        String        @default("ILS")
+  stripePaymentId String?
+  stripeSessionId String?
+  notes           String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  PARTIAL
+  REFUNDED
+  FAILED
+}
+
+enum PaymentMethod {
+  STRIPE
+  BANK_TRANSFER
+  CASH
+  OTHER
+}
+
+// ─────────────────────────────────────────────────────
+// CONTENT
+// ─────────────────────────────────────────────────────
+
+model Testimonial {
+  id         String   @id @default(cuid())
+  name       String
+  location   String?
+  quote      String   @db.Text
+  retreatRef String?
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  category  String?
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("faqs")
+}
+
+model RetreatFaq {
+  id        String  @id @default(cuid())
+  retreatId String
+  retreat   Retreat @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String  @db.Text
+  sortOrder Int     @default(0)
+
+  @@map("retreat_faqs")
+}
+
+model SiteContent {
+  id        String      @id @default(cuid())
+  key       String      @unique
+  label     String
+  value     String      @db.Text
+  type      ContentType @default(TEXT)
+  updatedAt DateTime    @updatedAt
+
+  @@map("site_content")
+}
+
+enum ContentType {
+  TEXT
+  RICHTEXT
+  IMAGE_URL
+  JSON
+}
