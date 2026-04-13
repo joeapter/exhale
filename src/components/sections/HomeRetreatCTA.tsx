@@ -10,12 +10,11 @@ export default function HomeRetreatCTA() {
         paddingBottom: "var(--section)",
       }}
     >
-      {/* Subtle warmth layer */}
       <div
         className="absolute inset-0 pointer-events-none"
         aria-hidden
         style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% 80%, rgba(212,149,106,0.12) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse 80% 60% at 50% 80%, rgba(212,149,106,0.1) 0%, transparent 70%)",
         }}
       />
 
@@ -23,11 +22,11 @@ export default function HomeRetreatCTA() {
         className="relative z-10 max-w-[1180px] mx-auto"
         style={{ paddingLeft: "var(--gutter)", paddingRight: "var(--gutter)" }}
       >
-        <div className="max-w-xl">
+        <div className="max-w-lg">
           <div className="flex items-center gap-3 mb-9">
             <span className="h-px w-5 block" style={{ background: "rgba(184,144,128,0.5)" }} />
             <span className="label-sm" style={{ color: "rgba(184,144,128,0.9)" }}>
-              Upcoming Retreat
+              Upcoming
             </span>
           </div>
 
@@ -35,16 +34,16 @@ export default function HomeRetreatCTA() {
             style={{
               fontFamily: "Cormorant Garamond, Georgia, serif",
               fontWeight: 300,
-              fontSize: "clamp(2rem, 4.5vw, 3.75rem)",
-              lineHeight: 1.1,
+              fontSize: "clamp(2.25rem, 5vw, 4rem)",
+              lineHeight: 1.05,
               color: "#FAF7F2",
               letterSpacing: "-0.01em",
-              marginBottom: "1.5rem",
+              marginBottom: "1.25rem",
             }}
           >
-            Summer Escape
+            EXHALE
             <br />
-            <span style={{ fontStyle: "italic", opacity: 0.85 }}>Makhtesh Ramon</span>
+            <em style={{ fontStyle: "italic", opacity: 0.85 }}>Desert Escape</em>
           </h2>
 
           <p
@@ -52,12 +51,12 @@ export default function HomeRetreatCTA() {
               fontFamily: "Jost, system-ui, sans-serif",
               fontWeight: 300,
               fontSize: "0.9375rem",
+              color: "rgba(228,216,201,0.65)",
               lineHeight: 1.8,
-              color: "rgba(228,216,201,0.7)",
-              marginBottom: "0.75rem",
+              marginBottom: "0.5rem",
             }}
           >
-            7–9 August 2026 · 3 days, 2 nights · Limited to 16 women
+            June 7–9 &nbsp;·&nbsp; 2 nights &nbsp;·&nbsp; Noor Glamping, Israel
           </p>
 
           <p
@@ -65,18 +64,17 @@ export default function HomeRetreatCTA() {
               fontFamily: "Jost, system-ui, sans-serif",
               fontWeight: 300,
               fontSize: "0.9375rem",
+              color: "rgba(228,216,201,0.65)",
               lineHeight: 1.8,
-              color: "rgba(228,216,201,0.7)",
               marginBottom: "3rem",
             }}
           >
-            The crater at dusk. Cool desert mornings. Fire-lit evenings.
-            Meals eaten slowly. Rest that actually lands. A few places remain.
+            A small group of women. Limited places.
           </p>
 
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-4">
             <Link
-              href="/retreats/summer-escape-2026"
+              href="/retreat"
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 400,
@@ -89,21 +87,19 @@ export default function HomeRetreatCTA() {
                 transition: "border-color 0.3s ease",
               }}
             >
-              View Retreat Details
+              Reserve a place
             </Link>
-
             <Link
-              href="/retreats"
+              href="/retreat"
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 300,
                 fontSize: "0.8125rem",
                 color: "rgba(184,144,128,0.65)",
                 letterSpacing: "0.05em",
-                transition: "color 0.3s ease",
               }}
             >
-              All retreats
+              View details
             </Link>
           </div>
         </div>

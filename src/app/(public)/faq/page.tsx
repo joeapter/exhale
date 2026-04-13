@@ -19,8 +19,8 @@ const faqs = [
         a: "Not in a religious sense. EXHALE draws from a philosophy of intentional rest, beauty, and presence. There are elements of reflection and connection built into the experience, but there is no doctrine or prescribed spiritual practice required.",
       },
       {
-        q: "How many women attend each retreat?",
-        a: "We keep our retreats small — a maximum of 16 women per retreat. This is a deliberate choice. Smallness creates intimacy. It allows us to prepare food with care, to know each guest by name, and to hold the space in a way that isn't possible with larger groups.",
+        q: "How many women attend?",
+        a: "We keep the group small — intentionally. Small enough to prepare food with care, to know each guest by name, and to hold the space well.",
       },
       {
         q: "Do I have to participate in everything?",
@@ -33,11 +33,11 @@ const faqs = [
     items: [
       {
         q: "Where exactly is the retreat held?",
-        a: "Our retreats are held at carefully chosen sites in the Israeli desert — primarily in the Negev. The precise location and detailed directions are shared with registered guests approximately three weeks before the retreat.",
+        a: "The June retreat is held at Noor Glamping — חוות אל היען, אורים, ישראל. Full directions are sent after registration.",
       },
       {
         q: "How do I get there?",
-        a: "We recommend driving. Most sites are 2–3 hours from Tel Aviv and 1 hour from Be'er Sheva. Carpooling coordination via our guest WhatsApp group is available. Shuttle options from Tel Aviv may be arranged for an additional fee — contact us to enquire.",
+        a: "We recommend driving. Noor Glamping is approximately 1 hour from Be'er Sheva and 2.5 hours from Tel Aviv. Carpooling coordination is available via our guest group after registration.",
       },
       {
         q: "What should I bring?",

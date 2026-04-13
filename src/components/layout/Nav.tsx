@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/about", label: "About" },
-  { href: "/retreats", label: "Retreats" },
+  { href: "/retreat", label: "Retreat" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
 ];
@@ -70,7 +70,7 @@ export default function Nav() {
           {/* CTA + mobile toggle */}
           <div className="flex items-center gap-5">
             <Link
-              href="/retreats"
+              href="/retreat"
               className="hidden md:inline-block label-sm text-[#3D2E22] hover:text-[#B89080] transition-colors duration-300"
               style={{ borderBottom: "1px solid rgba(184,144,128,0.45)", paddingBottom: "2px" }}
             >
@@ -131,7 +131,7 @@ export default function Nav() {
             </Link>
           ))}
           <Link
-            href="/retreats"
+            href="/retreat"
             onClick={() => setMenuOpen(false)}
             className="mt-4 label-md text-[#B89080] border-b border-[#B89080]/50 pb-px hover:border-[#B89080]"
           >

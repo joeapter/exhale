@@ -2,6 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
+
+const HERO_IMAGE = "/assets/desert-glamping-at-sunset.png";
 
 export default function HomeHero() {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -23,103 +26,25 @@ export default function HomeHero() {
 
   return (
     <section
-      className="relative min-h-screen flex flex-col justify-end overflow-hidden grain-overlay"
+      className="relative min-h-screen flex flex-col justify-end overflow-hidden"
       aria-label="EXHALE — Desert escape for women"
     >
-      {/* ── Atmospheric desert background ── */}
+      {/* ── Hero image background ── */}
       <div className="absolute inset-0" aria-hidden>
-        {/* Sky — warm dawn palette */}
+        <Image
+          src={HERO_IMAGE}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/* Readability veil */}
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(180deg, #EEE4D4 0%, #E2CEB6 28%, #D4B898 55%, #C4A080 78%, #B08860 100%)",
-          }}
-        />
-
-        {/* Distant sun haze — off-centre for asymmetry */}
-        <div
-          className="absolute"
-          style={{
-            top: "4%",
-            left: "42%",
-            width: "clamp(280px, 52vw, 560px)",
-            height: "clamp(280px, 52vw, 560px)",
-            borderRadius: "50%",
-            background: "radial-gradient(ellipse, rgba(224,172,96,0.4) 0%, rgba(224,172,96,0.15) 35%, transparent 65%)",
-            filter: "blur(48px)",
-            transform: "translateX(-50%)",
-          }}
-        />
-
-        {/* Mid-horizon heat shimmer */}
-        <div
-          className="absolute"
-          style={{
-            top: "45%",
-            left: 0,
-            right: 0,
-            height: "8%",
-            background: "linear-gradient(180deg, transparent 0%, rgba(232,212,180,0.3) 50%, transparent 100%)",
-            filter: "blur(12px)",
-          }}
-        />
-
-        {/* Dune — far left, large, soft */}
-        <div
-          className="absolute bottom-0"
-          style={{
-            left: "-12%",
-            width: "58%",
-            height: "46%",
-            background: "radial-gradient(ellipse 80% 80% at 60% 100%, rgba(168,136,104,0.7) 0%, rgba(152,120,88,0.3) 60%, transparent 100%)",
-            borderRadius: "60% 90% 0 0",
-            filter: "blur(2px)",
-          }}
-        />
-
-        {/* Dune — right, slightly in front */}
-        <div
-          className="absolute bottom-0"
-          style={{
-            right: "-6%",
-            width: "48%",
-            height: "38%",
-            background: "radial-gradient(ellipse 80% 80% at 40% 100%, rgba(156,124,92,0.65) 0%, rgba(140,108,76,0.25) 60%, transparent 100%)",
-            borderRadius: "90% 60% 0 0",
-            filter: "blur(1.5px)",
-          }}
-        />
-
-        {/* Ground plane */}
-        <div
-          className="absolute bottom-0 left-0 right-0"
-          style={{
-            height: "28%",
-            background: "linear-gradient(180deg, transparent 0%, rgba(100,72,48,0.45) 100%)",
-          }}
-        />
-
-        {/* Tent silhouette — very subtle, off-centre */}
-        <div
-          className="absolute"
-          style={{
-            bottom: "27%",
-            left: "54%",
-            width: "0",
-            height: "0",
-            borderLeft: "6vw solid transparent",
-            borderRight: "6vw solid transparent",
-            borderBottom: "8vw solid rgba(72,52,34,0.14)",
-            filter: "blur(1px)",
-          }}
-        />
-
-        {/* Veil — gradient from dark earth to transparent, bottom half */}
-        <div
-          className="absolute bottom-0 left-0 right-0"
-          style={{
-            height: "60%",
-            background: "linear-gradient(180deg, transparent 0%, rgba(48,34,20,0.62) 100%)",
+            background:
+              "linear-gradient(180deg, rgba(20,15,10,0.08) 0%, rgba(20,15,10,0.2) 52%, rgba(20,15,10,0.58) 100%)",
           }}
         />
       </div>
@@ -140,7 +65,7 @@ export default function HomeHero() {
             className="label-sm mb-10"
             style={{ color: "rgba(228,210,185,0.65)" }}
           >
-            Desert Escape for Women &nbsp;·&nbsp; Israel
+            June 7–9 &nbsp;·&nbsp; Noor Glamping &nbsp;·&nbsp; Israel
           </p>
 
           {/* Main headline */}
@@ -180,15 +105,15 @@ export default function HomeHero() {
               marginBottom: "clamp(2rem, 4vw, 3rem)",
             }}
           >
-            A women-only retreat in the Israeli desert.
-            Three days of genuine rest, nourishing meals,
-            open sky, and the kind of quiet you forgot existed.
+            A women-only desert escape.
+            Two nights of real rest, beautiful food,
+            and open sky.
           </p>
 
           {/* CTA pair */}
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-4">
             <Link
-              href="/retreats"
+              href="/retreat"
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 400,
@@ -201,7 +126,7 @@ export default function HomeHero() {
                 transition: "border-color 0.3s ease",
               }}
             >
-              Upcoming retreats
+              Reserve a place
             </Link>
             <Link
               href="/about"
