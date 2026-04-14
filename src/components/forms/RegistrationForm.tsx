@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 
 type Package = {
@@ -33,6 +33,8 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeImageByPackage, setActiveImageByPackage] = useState<Record<string, number>>({});
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
   const [selectedPackage, setSelectedPackage] = useState<string>(
     retreat.packages[0]?.id ?? ""
@@ -60,6 +62,15 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
       ? pkg.depositAmount
       : pkg.fullPrice
     : 0;
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLightbox(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [lightbox]);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -126,8 +137,21 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
     marginBottom: "0.25rem",
   };
 
-  function getPackageImage(pkg: Package) {
-    return pkg.images?.[0] || "/assets/desert-glamping-at-sunset.png";
+  function getPackageImages(pkg: Package) {
+    if (pkg.images && pkg.images.length > 0) return pkg.images;
+    return ["/assets/desert-glamping-at-sunset.png"];
+  }
+
+  function getActiveImageIndex(pkg: Package) {
+    const images = getPackageImages(pkg);
+    const index = activeImageByPackage[pkg.id] ?? 0;
+    return index >= 0 && index < images.length ? index : 0;
+  }
+
+  function setPackageImageIndex(pkgId: string, index: number, length: number) {
+    if (length <= 0) return;
+    const wrapped = ((index % length) + length) % length;
+    setActiveImageByPackage((prev) => ({ ...prev, [pkgId]: wrapped }));
   }
 
   return (
@@ -181,6 +205,9 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               {retreat.packages.map((p) => {
                 const isSelected = selectedPackage === p.id;
                 const isSoldOut = p.available === 0;
+                const packageImages = getPackageImages(p);
+                const activeImageIndex = getActiveImageIndex(p);
+                const activeImage = packageImages[activeImageIndex];
                 const occupancyText =
                   p.occupancy?.trim() ||
                   "Occupancy details provided after booking";
@@ -189,12 +216,19 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   "Beautifully appointed accommodation with full access to all retreat amenities.";
 
                 return (
-                <button
+                <div
                   key={p.id}
-                  type="button"
                   onClick={() => !isSoldOut && setSelectedPackage(p.id)}
-                  disabled={isSoldOut}
+                  onKeyDown={(event) => {
+                    if (isSoldOut) return;
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelectedPackage(p.id);
+                    }
+                  }}
                   className="w-full text-left overflow-hidden"
+                  role="button"
+                  tabIndex={isSoldOut ? -1 : 0}
                   style={{
                     border: isSelected
                       ? "1px solid rgba(184,144,128,0.65)"
@@ -206,12 +240,81 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   }}
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr]">
-                    <div className="relative h-44 sm:h-auto min-h-[168px] bg-[#E5D6C4]">
-                      <img
-                        src={getPackageImage(p)}
-                        alt={`${p.name} accommodation`}
-                        className="absolute inset-0 h-full w-full object-cover"
-                      />
+                    <div className="bg-[#E5D6C4]">
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setLightbox({
+                            src: activeImage,
+                            alt: `${p.name} accommodation`,
+                          });
+                        }}
+                        className="relative h-44 sm:h-[176px] w-full overflow-hidden"
+                        aria-label={`Enlarge ${p.name} image`}
+                        style={{ cursor: "zoom-in" }}
+                      >
+                        <img
+                          src={activeImage}
+                          alt={`${p.name} accommodation`}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      </button>
+
+                      {packageImages.length > 1 && (
+                        <div className="flex items-center gap-2 p-2 bg-[#F4EBDD]">
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setPackageImageIndex(p.id, activeImageIndex - 1, packageImages.length);
+                            }}
+                            className="h-7 w-7 shrink-0 rounded-full border border-[#D1C0AE] text-[#8A7563]"
+                            aria-label={`Previous ${p.name} image`}
+                          >
+                            {"<"}
+                          </button>
+
+                          <div className="flex gap-2 overflow-x-auto">
+                            {packageImages.map((imgSrc, idx) => (
+                              <button
+                                key={`${p.id}-${idx}`}
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setPackageImageIndex(p.id, idx, packageImages.length);
+                                }}
+                                className="relative h-9 w-11 shrink-0 overflow-hidden"
+                                style={{
+                                  border:
+                                    idx === activeImageIndex
+                                      ? "1px solid #8A7563"
+                                      : "1px solid rgba(138,117,99,0.35)",
+                                }}
+                                aria-label={`View ${p.name} image ${idx + 1}`}
+                              >
+                                <img
+                                  src={imgSrc}
+                                  alt={`${p.name} thumbnail ${idx + 1}`}
+                                  className="absolute inset-0 h-full w-full object-cover"
+                                />
+                              </button>
+                            ))}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setPackageImageIndex(p.id, activeImageIndex + 1, packageImages.length);
+                            }}
+                            className="h-7 w-7 shrink-0 rounded-full border border-[#D1C0AE] text-[#8A7563]"
+                            aria-label={`Next ${p.name} image`}
+                          >
+                            {">"}
+                          </button>
+                        </div>
+                      )}
                     </div>
                     <div className="p-5 sm:p-6">
                       <div className="flex items-start justify-between gap-5 mb-3">
@@ -287,7 +390,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                       </div>
                     </div>
                   </div>
-                </button>
+                </div>
                 );
               })}
             </div>
@@ -764,6 +867,30 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
           </div>
         )}
       </form>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[120] bg-black/80 p-4 sm:p-8 flex items-center justify-center"
+          onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            className="absolute top-5 right-5 h-10 w-10 rounded-full border border-white/30 text-white"
+            aria-label="Close image preview"
+          >
+            ×
+          </button>
+          <img
+            src={lightbox.src}
+            alt={lightbox.alt}
+            onClick={(event) => event.stopPropagation()}
+            className="max-h-[88vh] max-w-[92vw] object-contain"
+          />
+        </div>
+      )}
     </div>
   );
 }
