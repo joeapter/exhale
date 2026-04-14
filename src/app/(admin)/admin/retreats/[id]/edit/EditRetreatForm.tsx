@@ -2,7 +2,6 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 const inputStyle = {
   fontFamily: "Jost",
@@ -371,11 +370,10 @@ export default function EditRetreatForm({ retreat }: { retreat: Retreat }) {
                     <div className="flex flex-wrap gap-3 mb-3">
                       {pkg.images.map((url) => (
                         <div key={url} className="relative group" style={{ width: "100px", height: "80px" }}>
-                          <Image
+                          <img
                             src={url}
-                            alt=""
-                            fill
-                            className="object-cover"
+                            alt={`${pkg.name} photo`}
+                            className="h-full w-full object-cover"
                             style={{ borderRadius: "2px" }}
                           />
                           <button
