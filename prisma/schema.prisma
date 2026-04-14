@@ -106,6 +106,8 @@ model RetreatPackage {
   retreat       Retreat        @relation(fields: [retreatId], references: [id], onDelete: Cascade)
   name          String
   description   String?        @db.Text
+  occupancy     String?
+  images        String[]
   fullPrice     Int
   depositAmount Int
   capacity      Int            @default(1)

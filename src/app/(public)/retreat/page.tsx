@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "EXHALE Desert Escape — June 7–9",
@@ -9,64 +11,50 @@ export const metadata: Metadata = {
     "A women-only desert retreat at Noor Glamping, Israel. June 7–9. Two nights of real rest, beautiful food, and open sky.",
 };
 
-const retreat = {
-  id: "exhale-desert-escape",
-  slug: "exhale-desert-escape",
-  title: "EXHALE Desert Escape",
-  dates: "June 7–9",
-  nights: 2,
-  location: "Noor Glamping, Israel",
-  locationAddress: "חוות אל היען, אורים, ישראל",
-  spotsRemaining: 4,
-  packages: [
-    {
-      id: "p-shared",
-      name: "Shared Tent",
-      description: "A furnished tent shared with one other woman. Paired thoughtfully, or with a friend on request.",
-      fullPrice: 290000,
-      depositAmount: 80000,
-      available: 3,
-    },
-    {
-      id: "p-private",
-      name: "Private Tent",
-      description: "Your own tent, entirely to yourself.",
-      fullPrice: 390000,
-      depositAmount: 100000,
-      available: 1,
-    },
-  ],
-  inclusions: [
-    "2 nights in a furnished glamping tent",
-    "All meals from arrival dinner to departure breakfast",
-    "Morning movement sessions",
-    "Evening fire gathering",
-    "Sound & breathwork session",
-    "Desert walk",
-    "Welcome amenity kit",
-  ],
-  faqs: [
-    {
-      q: "Who is this for?",
-      a: "Women who are ready to rest. No retreat experience needed. Just a willingness to stop for a few days.",
-    },
-    {
-      q: "Can I come alone?",
-      a: "Yes — and many women do. The atmosphere is warm and there's a natural ease among guests.",
-    },
-    {
-      q: "What about dietary needs?",
-      a: "Our kitchen accommodates vegetarian, vegan, gluten-free, and most other requirements. Share yours when you register.",
-    },
-    {
-      q: "How do I get there?",
-      a: "We recommend driving. Noor Glamping is about 1 hour from Be'er Sheva and 2.5 hours from Tel Aviv. Full directions are sent after registration.",
-    },
-  ],
-};
+function formatRetreatDates(start: Date, end: Date) {
+  const opts: Intl.DateTimeFormatOptions = { month: "long", day: "numeric" };
+  const s = start.toLocaleDateString("en-US", opts);
+  const eDay = end.toLocaleDateString("en-US", { day: "numeric" });
+  return `${s}–${eDay}`;
+}
 
-export default function RetreatPage() {
+function nightsBetween(start: Date, end: Date) {
+  return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+export default async function RetreatPage() {
+  const retreat = await prisma.retreat.findUnique({
+    where: { slug: "exhale-desert-escape" },
+    include: {
+      packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
+      faqs: { orderBy: { sortOrder: "asc" } },
+    },
+  });
+
+  if (!retreat) notFound();
+
   const lowestPrice = Math.min(...retreat.packages.map((p) => p.fullPrice));
+  const dates = formatRetreatDates(retreat.startDate, retreat.endDate);
+  const nights = nightsBetween(retreat.startDate, retreat.endDate);
+
+  const inclusions = retreat.inclusions.length > 0
+    ? retreat.inclusions
+    : [
+        "2 nights in a furnished glamping tent",
+        "All meals from arrival dinner to departure breakfast — and of course, rosé",
+        "Morning movement sessions",
+        "Welcome amenity kit",
+        "And much more",
+      ];
+
+  const faqs = retreat.faqs.length > 0
+    ? retreat.faqs.map((f) => ({ q: f.question, a: f.answer }))
+    : [
+        { q: "Who is this for?", a: "Women who are ready to rest. No retreat experience needed. Just a willingness to stop for a few days." },
+        { q: "Can I come alone?", a: "Yes — and many women do. The atmosphere is warm and there's a natural ease among guests." },
+        { q: "What about dietary needs?", a: "Our kitchen accommodates vegetarian, vegan, gluten-free, and most other requirements. Share yours when you register." },
+        { q: "How do I get there?", a: "We recommend driving. Noor Glamping is about 1 hour from Be'er Sheva and 2.5 hours from Tel Aviv. Full directions are sent after registration." },
+      ];
 
   return (
     <>
@@ -98,7 +86,7 @@ export default function RetreatPage() {
           }}
         >
           <p className="label-sm mb-6" style={{ color: "rgba(228,210,185,0.6)" }}>
-            {retreat.dates} &nbsp;·&nbsp; {retreat.nights} nights &nbsp;·&nbsp; {retreat.location}
+            {dates} &nbsp;·&nbsp; {nights} nights &nbsp;·&nbsp; {retreat.location}
           </p>
           <h1
             style={{
@@ -144,14 +132,9 @@ export default function RetreatPage() {
                 maxWidth: "46ch",
               }}
             >
-              Two nights at Noor Glamping in the desert of southern Israel.
-              Furnished tents, long meals, morning movement, and evenings by the fire.
+              {retreat.overview}
             </p>
 
-            <p className="prose-exhale" style={{ maxWidth: "52ch", marginBottom: "1.4em" }}>
-              EXHALE is not a workshop. There is no curriculum. You arrive, you settle,
-              and the desert and the women around you do the rest.
-            </p>
             <p className="prose-exhale" style={{ maxWidth: "52ch" }}>
               Everything is prepared. The only thing required of you is to show up.
             </p>
@@ -160,10 +143,10 @@ export default function RetreatPage() {
             <div className="mt-12">
               <div className="flex items-center gap-3 mb-7">
                 <span className="h-px w-5 block" style={{ background: "var(--color-clay)", opacity: 0.5 }} />
-                <span className="label-sm text-[#B89080]">What's included</span>
+                <span className="label-sm text-[#B89080]">What&apos;s included</span>
               </div>
               <div className="space-y-0">
-                {retreat.inclusions.map((item, i) => (
+                {inclusions.map((item, i) => (
                   <div
                     key={i}
                     className="py-3"
@@ -212,13 +195,11 @@ export default function RetreatPage() {
 
               <div className="space-y-3 mb-7">
                 {[
-                  { label: "Dates", value: retreat.dates },
-                  { label: "Duration", value: `${retreat.nights} nights` },
+                  { label: "Dates", value: dates },
+                  { label: "Duration", value: `${nights} nights` },
                   { label: "Location", value: retreat.location },
-                  { label: "Group size", value: "Small — women only" },
-                  ...(retreat.spotsRemaining <= 5
-                    ? [{ label: "Availability", value: `${retreat.spotsRemaining} places left` }]
-                    : []),
+                  { label: "Group size", value: "Women only" },
+                  { label: "Availability", value: `${retreat.spotsRemaining} places left` },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex justify-between items-baseline gap-4">
                     <span className="label-sm text-[#9B8F84]">{label}</span>
@@ -237,21 +218,38 @@ export default function RetreatPage() {
                 ))}
               </div>
 
-              <Link
-                href={`/register/${retreat.slug}`}
-                className="block w-full text-center py-4 uppercase transition-all duration-300"
-                style={{
-                  fontFamily: "Jost, system-ui, sans-serif",
-                  fontWeight: 400,
-                  fontSize: "0.75rem",
-                  letterSpacing: "0.18em",
-                  background: "var(--color-espresso)",
-                  color: "#FAF7F2",
-                  marginBottom: "1rem",
-                }}
-              >
-                Reserve a Place
-              </Link>
+              {retreat.status === "SOLD_OUT" ? (
+                <p
+                  className="w-full text-center py-4 uppercase"
+                  style={{
+                    fontFamily: "Jost, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.18em",
+                    background: "rgba(184,144,128,0.15)",
+                    color: "var(--color-taupe)",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Sold Out
+                </p>
+              ) : (
+                <Link
+                  href={`/register/${retreat.slug}`}
+                  className="block w-full text-center py-4 uppercase transition-all duration-300"
+                  style={{
+                    fontFamily: "Jost, system-ui, sans-serif",
+                    fontWeight: 400,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.18em",
+                    background: "var(--color-espresso)",
+                    color: "#FAF7F2",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  Reserve a Place
+                </Link>
+              )}
 
               <p
                 className="text-center"
@@ -316,7 +314,7 @@ export default function RetreatPage() {
               <span className="label-sm text-[#B89080]">Questions</span>
             </div>
             <div>
-              {retreat.faqs.map((faq, i) => (
+              {faqs.map((faq, i) => (
                 <div
                   key={i}
                   className="py-7"
@@ -376,7 +374,7 @@ export default function RetreatPage() {
           style={{ paddingLeft: "var(--gutter)", paddingRight: "var(--gutter)" }}
         >
           <p className="label-sm mb-6" style={{ color: "rgba(184,144,128,0.7)" }}>
-            June 7–9 &nbsp;·&nbsp; Noor Glamping &nbsp;·&nbsp; {retreat.spotsRemaining} places left
+            {dates} &nbsp;·&nbsp; {retreat.location} &nbsp;·&nbsp; {retreat.spotsRemaining} places left
           </p>
           <h2
             style={{
@@ -391,21 +389,23 @@ export default function RetreatPage() {
             Ready to
             <em style={{ fontStyle: "italic" }}> exhale?</em>
           </h2>
-          <Link
-            href={`/register/${retreat.slug}`}
-            style={{
-              fontFamily: "Jost, system-ui, sans-serif",
-              fontWeight: 400,
-              fontSize: "0.75rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "#FAF7F2",
-              borderBottom: "1px solid rgba(250,247,242,0.35)",
-              paddingBottom: "3px",
-            }}
-          >
-            Reserve a place
-          </Link>
+          {retreat.status !== "SOLD_OUT" && (
+            <Link
+              href={`/register/${retreat.slug}`}
+              style={{
+                fontFamily: "Jost, system-ui, sans-serif",
+                fontWeight: 400,
+                fontSize: "0.75rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "#FAF7F2",
+                borderBottom: "1px solid rgba(250,247,242,0.35)",
+                paddingBottom: "3px",
+              }}
+            >
+              Reserve a place
+            </Link>
+          )}
         </div>
       </section>
     </>

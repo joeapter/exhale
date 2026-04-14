@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { formatDateRange, retreatNights, formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -7,48 +8,12 @@ export const metadata: Metadata = {
   description: "Upcoming EXHALE desert retreats. Limited places available.",
 };
 
-// Sample data — replace with DB fetch after Prisma migration
-const sampleRetreats = [
-  {
-    id: "1",
-    slug: "summer-escape-2026",
-    status: "PUBLISHED" as const,
-    title: "Summer Escape",
-    tagline: "Stillness in the crater",
-    location: "Makhtesh Ramon, Negev",
-    startDate: new Date("2026-08-07"),
-    endDate: new Date("2026-08-09"),
-    capacity: 16,
-    spotsRemaining: 4,
-    heroImage: null,
-    packages: [
-      { id: "p1", name: "Shared Tent", fullPrice: 290000, depositAmount: 80000, available: 3 },
-      { id: "p2", name: "Private Tent", fullPrice: 390000, depositAmount: 100000, available: 1 },
-    ],
-  },
-  {
-    id: "2",
-    slug: "autumn-stillness-2026",
-    status: "PUBLISHED" as const,
-    title: "Autumn Stillness",
-    tagline: "Desert colors at golden hour",
-    location: "Ein Avdat, Negev",
-    startDate: new Date("2026-10-16"),
-    endDate: new Date("2026-10-18"),
-    capacity: 14,
-    spotsRemaining: 14,
-    heroImage: null,
-    packages: [
-      { id: "p3", name: "Shared Tent", fullPrice: 290000, depositAmount: 80000, available: 10 },
-      { id: "p4", name: "Private Tent", fullPrice: 390000, depositAmount: 100000, available: 4 },
-    ],
-  },
-];
-
 export default async function RetreatsPage() {
-  // Uncomment to use live data:
-  // const retreats = await getPublishedRetreats();
-  const retreats = sampleRetreats;
+  const retreats = await prisma.retreat.findMany({
+    where: { status: { in: ["PUBLISHED", "SOLD_OUT"] } },
+    include: { packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
+    orderBy: { startDate: "asc" },
+  });
 
   return (
     <>
@@ -139,9 +104,11 @@ export default async function RetreatsPage() {
           ) : (
             <div className="space-y-0">
               {retreats.map((retreat, i) => {
-                const isSoldOut = (retreat.status as string) === "SOLD_OUT" || retreat.spotsRemaining === 0;
+                const isSoldOut = retreat.status === "SOLD_OUT" || retreat.spotsRemaining === 0;
                 const nights = retreatNights(retreat.startDate, retreat.endDate);
-                const lowestPrice = Math.min(...retreat.packages.map((p) => p.fullPrice));
+                const lowestPrice = retreat.packages.length > 0
+                  ? Math.min(...retreat.packages.map((p) => p.fullPrice))
+                  : 0;
 
                 return (
                   <div
@@ -220,21 +187,23 @@ export default async function RetreatsPage() {
 
                     {/* Price + CTA */}
                     <div className="md:col-span-3 md:col-start-9 md:text-right flex flex-col md:items-end gap-5">
-                      <div>
-                        <div className="label-sm text-[#9B8F84] mb-1">From</div>
-                        <div
-                          style={{
-                            fontFamily: "Cormorant Garamond, Georgia, serif",
-                            fontWeight: 300,
-                            fontSize: "clamp(1.5rem, 2vw, 2rem)",
-                            color: "var(--color-espresso)",
-                            lineHeight: 1,
-                          }}
-                        >
-                          {formatCurrency(lowestPrice)}
+                      {lowestPrice > 0 && (
+                        <div>
+                          <div className="label-sm text-[#9B8F84] mb-1">From</div>
+                          <div
+                            style={{
+                              fontFamily: "Cormorant Garamond, Georgia, serif",
+                              fontWeight: 300,
+                              fontSize: "clamp(1.5rem, 2vw, 2rem)",
+                              color: "var(--color-espresso)",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {formatCurrency(lowestPrice)}
+                          </div>
+                          <div className="label-sm text-[#9B8F84] mt-1">per person</div>
                         </div>
-                        <div className="label-sm text-[#9B8F84] mt-1">per person</div>
-                      </div>
+                      )}
 
                       <div className="flex flex-col md:items-end gap-3">
                         {!isSoldOut && (
@@ -249,7 +218,6 @@ export default async function RetreatsPage() {
                               color: "var(--color-espresso)",
                               borderBottom: "1px solid rgba(61,46,34,0.4)",
                               paddingBottom: "2px",
-                              transition: "border-color 0.3s ease",
                             }}
                           >
                             Reserve a Place
@@ -263,7 +231,6 @@ export default async function RetreatsPage() {
                             fontSize: "0.8125rem",
                             color: "var(--color-taupe-light)",
                             letterSpacing: "0.05em",
-                            transition: "color 0.3s ease",
                           }}
                         >
                           View details
@@ -306,7 +273,7 @@ export default async function RetreatsPage() {
             href="/contact"
             className="label-md text-[#B89080] hover:text-[#7A6A5A] transition-colors duration-300 border-b border-current pb-px"
           >
-            We're happy to help you choose
+            We&apos;re happy to help you choose
           </Link>
         </div>
       </section>

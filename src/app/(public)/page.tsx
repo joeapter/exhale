@@ -3,7 +3,6 @@ import HomeHero from "@/components/sections/HomeHero";
 import HomeIntro from "@/components/sections/HomeIntro";
 import HomeExperience from "@/components/sections/HomeExperience";
 import HomeAtmosphere from "@/components/sections/HomeAtmosphere";
-import HomeTestimonials from "@/components/sections/HomeTestimonials";
 import HomeRetreatCTA from "@/components/sections/HomeRetreatCTA";
 
 export const metadata: Metadata = {
@@ -19,7 +18,6 @@ export default function HomePage() {
       <HomeIntro />
       <HomeExperience />
       <HomeAtmosphere />
-      <HomeTestimonials />
       <HomeRetreatCTA />
     </>
   );

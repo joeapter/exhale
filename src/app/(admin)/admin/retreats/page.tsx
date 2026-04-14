@@ -1,25 +1,17 @@
 import { getAdminSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { formatDateRange } from "@/lib/utils";
 
 export default async function AdminRetreatsPage() {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
 
-  // Uncomment for live data: const retreats = await prisma.retreat.findMany({ ... })
-  const retreats = [
-    {
-      id: "1", slug: "summer-escape-2026", title: "Summer Escape", status: "PUBLISHED",
-      startDate: new Date("2026-08-07"), endDate: new Date("2026-08-09"),
-      location: "Makhtesh Ramon", capacity: 16, spotsRemaining: 4,
-    },
-    {
-      id: "2", slug: "autumn-stillness-2026", title: "Autumn Stillness", status: "PUBLISHED",
-      startDate: new Date("2026-10-16"), endDate: new Date("2026-10-18"),
-      location: "Ein Avdat", capacity: 14, spotsRemaining: 14,
-    },
-  ];
+  const retreats = await prisma.retreat.findMany({
+    orderBy: { startDate: "asc" },
+    include: { _count: { select: { registrations: true } } },
+  });
 
   const statusColor: Record<string, string> = {
     DRAFT: "rgba(155,143,132,1)",
@@ -68,7 +60,13 @@ export default async function AdminRetreatsPage() {
             </tr>
           </thead>
           <tbody>
-            {retreats.map((r, i) => (
+            {retreats.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-5 py-10 text-center" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe-light)" }}>
+                  No retreats yet. Create your first one.
+                </td>
+              </tr>
+            ) : retreats.map((r, i) => (
               <tr
                 key={r.id}
                 style={{ borderBottom: i < retreats.length - 1 ? "1px solid rgba(228,216,201,0.5)" : "none" }}
@@ -97,8 +95,8 @@ export default async function AdminRetreatsPage() {
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-4">
-                    <Link href={`/admin/retreats/${r.id}`} className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors">Edit</Link>
-                    <Link href={`/retreats/${r.slug}`} target="_blank" className="label-sm text-[#9B8F84] hover:text-[#7A6A5A] transition-colors">View</Link>
+                    <Link href={`/admin/retreats/${r.id}/edit`} className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors">Edit</Link>
+                    <Link href={`/retreat`} target="_blank" className="label-sm text-[#9B8F84] hover:text-[#7A6A5A] transition-colors">View</Link>
                   </div>
                 </td>
               </tr>

@@ -2,22 +2,17 @@ const experiences = [
   {
     number: "01",
     title: "The Place",
-    body: "Noor Glamping sits in the desert of southern Israel — furnished tents, hot baths, hammocks, and a long horizon.",
+    body: "Noor Glamping sits in the desert of southern Israel — luxury furnished tents, air conditioning, hammocks, plunge pools, dock by the stream, and breathtaking views.",
   },
   {
     number: "02",
-    title: "The Rest",
-    body: "Morning movement in the desert air. Fire in the evenings. Time in between that belongs entirely to you.",
+    title: "The Food",
+    body: "Nourishing, freshly made on site, with the highest kashrus standards. We eat together slowly — under the sky.",
   },
   {
     number: "03",
-    title: "The Food",
-    body: "Nourishing, seasonal, beautiful. We eat together slowly — around a long table, under the sky.",
-  },
-  {
-    number: "04",
-    title: "The Company",
-    body: "Women who've made the same choice to stop and rest. Something rare happens when you're in that room.",
+    title: "The Experience",
+    body: "A variety of soul stirring workshops on Hisboddedus (perfect desert setting,) journaling, therapeutic art class, yoga, holistic body treatments, cozy bonfire Kumzits, DJ dance party under the sky.",
   },
 ];
 

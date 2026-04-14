@@ -1,87 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "FAQ",
   description: "Answers to common questions about EXHALE retreats.",
 };
 
-const faqs = [
-  {
-    category: "The Retreat",
-    items: [
-      {
-        q: "Who is EXHALE for?",
-        a: "EXHALE is for women who are ready to rest. You don't need to be spiritual, experienced with retreats, or have any particular background. If you are a woman who is tired, or simply ready for three days of genuine space — this is for you.",
-      },
-      {
-        q: "Is this a spiritual retreat?",
-        a: "Not in a religious sense. EXHALE draws from a philosophy of intentional rest, beauty, and presence. There are elements of reflection and connection built into the experience, but there is no doctrine or prescribed spiritual practice required.",
-      },
-      {
-        q: "How many women attend?",
-        a: "We keep the group small — intentionally. Small enough to prepare food with care, to know each guest by name, and to hold the space well.",
-      },
-      {
-        q: "Do I have to participate in everything?",
-        a: "Nothing is required. The morning movement session, the evening gathering, the guided walk — all are invitations, not obligations. You are welcome to sleep, to sit alone, to read, to simply be.",
-      },
-    ],
-  },
-  {
-    category: "Practical",
-    items: [
-      {
-        q: "Where exactly is the retreat held?",
-        a: "The June retreat is held at Noor Glamping — חוות אל היען, אורים, ישראל. Full directions are sent after registration.",
-      },
-      {
-        q: "How do I get there?",
-        a: "We recommend driving. Noor Glamping is approximately 1 hour from Be'er Sheva and 2.5 hours from Tel Aviv. Carpooling coordination is available via our guest group after registration.",
-      },
-      {
-        q: "What should I bring?",
-        a: "A full packing list is sent after registration. In brief: layers (desert nights are cool even in summer), comfortable walking shoes, sunscreen, a good book, and whatever helps you rest. We provide linens, towels, and basic toiletries.",
-      },
-      {
-        q: "Is the desert too hot in summer?",
-        a: "Desert heat is different from coastal heat. It is dry, which makes it far more manageable. Our programming is scheduled around the cooler parts of the day — early mornings and evenings. The midday hours are for shade, rest, and swimming (where available).",
-      },
-    ],
-  },
-  {
-    category: "Health & Dietary",
-    items: [
-      {
-        q: "Can you accommodate my dietary needs?",
-        a: "Yes. Our kitchen accommodates vegetarian, vegan, gluten-free, and most other dietary needs with genuine care and creativity. Please share your requirements clearly in your registration form.",
-      },
-      {
-        q: "Are there any health requirements?",
-        a: "EXHALE is appropriate for most women in general good health. We ask that you share any health conditions relevant to your stay in your registration — not to gatekeep, but to care for you well. If you have specific concerns, please reach out and we'll discuss.",
-      },
-    ],
-  },
-  {
-    category: "Booking & Payment",
-    items: [
-      {
-        q: "Can I pay a deposit to secure my place?",
-        a: "Yes. You may secure your place with a deposit at the time of registration. The remaining balance is due 30 days before the retreat start date. Full payment is also accepted at registration.",
-      },
-      {
-        q: "What is your cancellation policy?",
-        a: "Cancellations made more than 60 days before the retreat receive a full refund less a small administrative fee. Cancellations between 30–60 days are eligible for a 50% refund or a credit toward a future retreat. Cancellations within 30 days are non-refundable, but we will do our best to fill your place and offer a partial credit. Full policy details are shared at registration.",
-      },
-      {
-        q: "What if a retreat is sold out?",
-        a: "Contact us to be added to our waitlist. We frequently have cancellations, and waitlisted guests are notified immediately when a place becomes available.",
-      },
-    ],
-  },
-];
+export default async function FaqPage() {
+  const rawFaqs = await prisma.faq.findMany({
+    where: { isActive: true },
+    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+  });
 
-export default function FaqPage() {
+  // Group by category
+  const grouped = rawFaqs.reduce<Record<string, { question: string; answer: string }[]>>((acc, faq) => {
+    const cat = faq.category ?? "General";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push({ question: faq.question, answer: faq.answer });
+    return acc;
+  }, {});
+
+  const sections = Object.entries(grouped);
+
   return (
     <>
       {/* Header */}
@@ -115,7 +56,7 @@ export default function FaqPage() {
               color: "#3D2E22",
             }}
           >
-            Questions &
+            Questions &amp;
             <br />
             <span style={{ fontStyle: "italic" }}>Answers</span>
           </h1>
@@ -135,15 +76,19 @@ export default function FaqPage() {
           style={{ paddingLeft: "var(--gutter)", paddingRight: "var(--gutter)" }}
         >
           <div className="max-w-2xl">
-            {faqs.map((section, si) => (
-              <div key={section.category} className={si > 0 ? "mt-16" : ""}>
+            {sections.length === 0 ? (
+              <p style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.9375rem", color: "var(--color-taupe-light)" }}>
+                Coming soon.
+              </p>
+            ) : sections.map(([category, items], si) => (
+              <div key={category} className={si > 0 ? "mt-16" : ""}>
                 <div className="flex items-center gap-3 mb-8">
                   <span className="h-px w-5 block" style={{ background: "var(--color-clay)", opacity: 0.5 }} />
-                  <span className="label-sm text-[#B89080]">{section.category}</span>
+                  <span className="label-sm text-[#B89080]">{category}</span>
                 </div>
 
                 <div className="space-y-0">
-                  {section.items.map((item, qi) => (
+                  {items.map((item, qi) => (
                     <div
                       key={qi}
                       className="py-7"
@@ -159,7 +104,7 @@ export default function FaqPage() {
                           marginBottom: "0.875rem",
                         }}
                       >
-                        {item.q}
+                        {item.question}
                       </h3>
                       <p
                         style={{
@@ -170,7 +115,7 @@ export default function FaqPage() {
                           color: "var(--color-taupe)",
                         }}
                       >
-                        {item.a}
+                        {item.answer}
                       </p>
                     </div>
                   ))}
@@ -209,7 +154,7 @@ export default function FaqPage() {
             href="/contact"
             className="label-md text-[#B89080] hover:text-[#7A6A5A] transition-colors border-b border-current pb-px"
           >
-            We'd love to hear from you
+            We&apos;d love to hear from you
           </Link>
         </div>
       </section>

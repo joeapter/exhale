@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateConfirmationRef } from "@/lib/utils";
+import { sendRegistrationConfirmation, sendRegistrationNotification } from "@/lib/email";
 import { z } from "zod";
 
 const registrationSchema = z.object({
@@ -68,57 +69,47 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // If Stripe is not configured, return the confirmation directly
-    if (!process.env.STRIPE_SECRET_KEY) {
-      await prisma.registration.update({
-        where: { id: registration.id },
-        data: { status: "CONFIRMED", confirmedAt: new Date() },
-      });
-      return NextResponse.json({
-        checkoutUrl: `/register/confirmation?ref=${confirmationRef}`,
-      });
-    }
-
-    // Create Stripe checkout session
-    const { default: Stripe } = await import("stripe");
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2026-03-25.dahlia",
-    });
-
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "ils",
-            product_data: {
-              name: `${retreat.title} — ${pkg.name}`,
-              description:
-                data.paymentType === "DEPOSIT"
-                  ? "Deposit (balance due 30 days before retreat)"
-                  : "Full payment",
-            },
-            unit_amount: amountDue,
-          },
-          quantity: 1,
-        },
-      ],
-      customer_email: data.email,
-      metadata: { registrationId: registration.id, confirmationRef },
-      success_url: `${process.env.NEXT_PUBLIC_URL}/register/confirmation?ref=${confirmationRef}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_URL}/register/${retreat.slug}?canceled=1`,
-    });
-
+    // Mark confirmed immediately (Stripe not yet wired up)
     await prisma.registration.update({
       where: { id: registration.id },
-      data: { stripeSessionId: session.id },
+      data: { status: "CONFIRMED", confirmedAt: new Date() },
     });
 
-    return NextResponse.json({ checkoutUrl: session.url });
+    // Decrement spots
+    await prisma.retreat.update({
+      where: { id: data.retreatId },
+      data: { spotsRemaining: { decrement: 1 } },
+    });
+
+    // Send emails (non-blocking — don't fail the registration if email fails)
+    const emailData = {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      phone: data.phone,
+      packageName: pkg.name,
+      paymentType: data.paymentType,
+      amountDue,
+      confirmationRef,
+      roomingPref: data.roomingPref,
+      dietaryNeeds: data.dietaryNeeds,
+      healthNotes: data.healthNotes,
+      additionalNotes: data.additionalNotes,
+      emergencyName: data.emergencyName,
+      emergencyPhone: data.emergencyPhone,
+      emergencyRel: data.emergencyRel,
+    };
+    Promise.all([
+      sendRegistrationConfirmation(emailData),
+      sendRegistrationNotification(emailData),
+    ]).catch((err) => console.error("Email send error:", err));
+
+    return NextResponse.json({
+      checkoutUrl: `/register/confirmation?ref=${confirmationRef}`,
+    });
   } catch (err) {
     if (err instanceof z.ZodError) {
-      return NextResponse.json({ error: "Invalid form data." }, { status: 400 });
+      return NextResponse.json({ error: "Please fill in all required fields." }, { status: 400 });
     }
     console.error("Registration error:", err);
     return NextResponse.json({ error: "Something went wrong. Please try again." }, { status: 500 });

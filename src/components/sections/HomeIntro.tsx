@@ -23,8 +23,8 @@ export default function HomeIntro() {
             }}
           >
             <Image
-              src="/assets/noor/interior.webp"
-              alt="Noor Glamping interior"
+              src="/assets/noor/bonfire.webp"
+              alt="Evening bonfire at Noor Glamping"
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 40vw"
@@ -56,12 +56,12 @@ export default function HomeIntro() {
 
           <p className="prose-exhale" style={{ maxWidth: "44ch", marginBottom: "1.4em" }}>
             EXHALE is a women-only retreat at Noor Glamping in the Israeli desert.
-            Not a workshop. Not a spa. Just two nights of genuine rest —
+            A total nervous system reset. Two nights of genuine rest —
             beautiful food, open sky, and the company of women who understand.
           </p>
 
           <p className="prose-exhale" style={{ maxWidth: "44ch", marginBottom: "2rem" }}>
-            You're allowed to do nothing. We've prepared everything.
+            We've curated an amazing, inspirational program that will revive your body and soul.
           </p>
 
           <a

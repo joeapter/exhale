@@ -1,39 +1,24 @@
 import { getAdminSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default async function AdminRegistrationsPage() {
   const session = await getAdminSession();
   if (!session) redirect("/admin/login");
 
-  // Sample data — replace with: await prisma.registration.findMany({ ... })
-  const registrations = [
-    {
-      id: "r1", firstName: "Noa", lastName: "Cohen", email: "noa@example.com",
-      retreat: "Summer Escape", package: "Private Tent",
-      status: "CONFIRMED", paymentType: "FULL",
-      amountDue: 390000, amountPaid: 390000,
-      createdAt: new Date("2026-04-11"),
-      confirmationRef: "EX-M5KQAJ-7X2F",
+  const registrations = await prisma.registration.findMany({
+    orderBy: { createdAt: "desc" },
+    include: {
+      retreat: { select: { title: true } },
+      package: { select: { name: true } },
     },
-    {
-      id: "r2", firstName: "Tamar", lastName: "Levi", email: "tamar@example.com",
-      retreat: "Summer Escape", package: "Shared Tent",
-      status: "CONFIRMED", paymentType: "DEPOSIT",
-      amountDue: 290000, amountPaid: 80000,
-      createdAt: new Date("2026-04-10"),
-      confirmationRef: "EX-M5KPBR-9Y3G",
-    },
-    {
-      id: "r3", firstName: "Michal", lastName: "Ben-David", email: "michal@example.com",
-      retreat: "Autumn Stillness", package: "Shared Tent",
-      status: "PENDING", paymentType: "DEPOSIT",
-      amountDue: 290000, amountPaid: 0,
-      createdAt: new Date("2026-04-09"),
-      confirmationRef: null,
-    },
-  ];
+  });
+
+  const total = registrations.length;
+  const confirmed = registrations.filter((r) => r.status === "CONFIRMED").length;
+  const pending = registrations.filter((r) => r.status === "PENDING").length;
 
   const statusColor: Record<string, { color: string; bg: string }> = {
     PENDING: { color: "rgba(212,149,106,1)", bg: "rgba(212,149,106,0.1)" },
@@ -56,7 +41,8 @@ export default async function AdminRegistrationsPage() {
         >
           Registrations
         </h1>
-        <button
+        <Link
+          href="/api/admin/registrations/export"
           className="inline-flex items-center gap-2 px-5 py-2.5 transition-all uppercase"
           style={{
             fontFamily: "Jost",
@@ -65,20 +51,18 @@ export default async function AdminRegistrationsPage() {
             letterSpacing: "0.16em",
             border: "1px solid rgba(184,144,128,0.5)",
             color: "var(--color-espresso)",
-            background: "transparent",
-            cursor: "pointer",
           }}
         >
           Export CSV
-        </button>
+        </Link>
       </div>
 
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
-          { label: "Total", value: registrations.length },
-          { label: "Confirmed", value: registrations.filter((r) => r.status === "CONFIRMED").length },
-          { label: "Pending", value: registrations.filter((r) => r.status === "PENDING").length },
+          { label: "Total", value: total },
+          { label: "Confirmed", value: confirmed },
+          { label: "Pending", value: pending },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -102,74 +86,81 @@ export default async function AdminRegistrationsPage() {
       </div>
 
       <div style={{ background: "#FAF7F2", border: "1px solid rgba(228,216,201,0.8)", overflowX: "auto" }}>
-        <table className="w-full min-w-[900px]">
-          <thead>
-            <tr style={{ borderBottom: "1px solid rgba(228,216,201,0.8)" }}>
-              {["Guest", "Retreat", "Package", "Payment", "Amount", "Status", "Date", "Actions"].map((col) => (
-                <th key={col} className="text-left px-4 py-3.5 label-sm text-[#9B8F84]">{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {registrations.map((r, i) => (
-              <tr
-                key={r.id}
-                style={{ borderBottom: i < registrations.length - 1 ? "1px solid rgba(228,216,201,0.5)" : "none" }}
-              >
-                <td className="px-4 py-4">
-                  <div style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.875rem", color: "var(--color-espresso)" }}>
-                    {r.firstName} {r.lastName}
-                  </div>
-                  <div style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}>
-                    {r.email}
-                  </div>
-                </td>
-                <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe)" }}>{r.retreat}</td>
-                <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe)" }}>{r.package}</td>
-                <td className="px-4 py-4">
-                  <span
-                    className="label-sm"
-                    style={{ color: r.paymentType === "FULL" ? "var(--color-taupe)" : "rgba(212,149,106,0.9)" }}
-                  >
-                    {r.paymentType === "DEPOSIT" ? "Deposit" : "Full"}
-                  </span>
-                </td>
-                <td className="px-4 py-4">
-                  <div style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-espresso)" }}>
-                    {formatCurrency(r.amountPaid)}
-                  </div>
-                  {r.paymentType === "DEPOSIT" && r.amountPaid < r.amountDue && (
-                    <div style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}>
-                      of {formatCurrency(r.amountDue)}
-                    </div>
-                  )}
-                </td>
-                <td className="px-4 py-4">
-                  <span
-                    className="label-sm px-2 py-0.5"
-                    style={{
-                      color: statusColor[r.status]?.color ?? "var(--color-taupe)",
-                      background: statusColor[r.status]?.bg ?? "transparent",
-                    }}
-                  >
-                    {r.status}
-                  </span>
-                </td>
-                <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe-light)" }}>
-                  {formatDate(r.createdAt)}
-                </td>
-                <td className="px-4 py-4">
-                  <Link
-                    href={`/admin/registrations/${r.id}`}
-                    className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors"
-                  >
-                    View
-                  </Link>
-                </td>
+        {registrations.length === 0 ? (
+          <p className="px-4 py-10 text-center" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe-light)" }}>
+            No registrations yet.
+          </p>
+        ) : (
+          <table className="w-full min-w-[900px]">
+            <thead>
+              <tr style={{ borderBottom: "1px solid rgba(228,216,201,0.8)" }}>
+                {["Guest", "Retreat", "Package", "Payment", "Amount", "Status", "Date", "Actions"].map((col) => (
+                  <th key={col} className="text-left px-4 py-3.5 label-sm text-[#9B8F84]">{col}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {registrations.map((r, i) => (
+                <tr
+                  key={r.id}
+                  style={{ borderBottom: i < registrations.length - 1 ? "1px solid rgba(228,216,201,0.5)" : "none" }}
+                >
+                  <td className="px-4 py-4">
+                    <div style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.875rem", color: "var(--color-espresso)" }}>
+                      {r.firstName} {r.lastName}
+                    </div>
+                    <div style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}>
+                      {r.email}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe)" }}>
+                    {r.retreat.title}
+                  </td>
+                  <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe)" }}>
+                    {r.package?.name ?? "—"}
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="label-sm" style={{ color: r.paymentType === "FULL" ? "var(--color-taupe)" : "rgba(212,149,106,0.9)" }}>
+                      {r.paymentType === "DEPOSIT" ? "Deposit" : "Full"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <div style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-espresso)" }}>
+                      {formatCurrency(r.amountPaid)}
+                    </div>
+                    {r.paymentType === "DEPOSIT" && r.amountPaid < r.amountDue && (
+                      <div style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}>
+                        of {formatCurrency(r.amountDue)}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-4">
+                    <span
+                      className="label-sm px-2 py-0.5"
+                      style={{
+                        color: statusColor[r.status]?.color ?? "var(--color-taupe)",
+                        background: statusColor[r.status]?.bg ?? "transparent",
+                      }}
+                    >
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe-light)" }}>
+                    {formatDate(r.createdAt)}
+                  </td>
+                  <td className="px-4 py-4">
+                    <Link
+                      href={`/admin/registrations/${r.id}`}
+                      className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors"
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </div>
     </div>
   );

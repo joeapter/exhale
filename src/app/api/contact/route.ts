@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendContactNotification } from "@/lib/email";
 import { z } from "zod";
 
 const schema = z.object({
@@ -13,16 +14,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = schema.parse(body);
 
-    // Send via Resend (configure when Resend is set up)
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: "EXHALE Website <noreply@exhale.co.il>",
-    //   to: "hello@exhale.co.il",
-    //   subject: `Contact: ${data.subject || "New message"} from ${data.name}`,
-    //   text: `Name: ${data.name}\nEmail: ${data.email}\nSubject: ${data.subject}\n\n${data.message}`,
-    // });
-
-    console.log("Contact form submission:", data);
+    await sendContactNotification(data);
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -1,44 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 import RegistrationForm from "@/components/forms/RegistrationForm";
 
 export const metadata: Metadata = {
   title: "Reserve a Place",
   description: "Reserve your place at an EXHALE desert retreat.",
-};
-
-// Sample retreat data — replace with DB fetch
-const sampleRetreats: Record<string, RegistrationRetreat> = {
-  "summer-escape-2026": {
-    id: "1",
-    slug: "summer-escape-2026",
-    title: "Summer Escape",
-    location: "Makhtesh Ramon, Negev",
-    startDate: new Date("2026-08-07"),
-    endDate: new Date("2026-08-09"),
-    spotsRemaining: 4,
-    packages: [
-      { id: "p1", name: "Shared Tent", fullPrice: 290000, depositAmount: 80000, available: 3 },
-      { id: "p2", name: "Private Tent", fullPrice: 390000, depositAmount: 100000, available: 1 },
-    ],
-  },
-};
-
-type RegistrationRetreat = {
-  id: string;
-  slug: string;
-  title: string;
-  location: string;
-  startDate: Date;
-  endDate: Date;
-  spotsRemaining: number;
-  packages: {
-    id: string;
-    name: string;
-    fullPrice: number;
-    depositAmount: number;
-    available: number;
-  }[];
 };
 
 type Props = {
@@ -47,9 +14,40 @@ type Props = {
 
 export default async function RegisterPage({ params }: Props) {
   const { retreatSlug } = await params;
-  const retreat = sampleRetreats[retreatSlug];
 
-  if (!retreat) notFound();
+  const retreat = await prisma.retreat.findUnique({
+    where: { slug: retreatSlug },
+    include: {
+      packages: {
+        where: { available: { gt: 0 } },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+
+  if (!retreat || retreat.status === "SOLD_OUT" || retreat.status === "CANCELED") {
+    notFound();
+  }
+
+  const registrationRetreat = {
+    id: retreat.id,
+    slug: retreat.slug,
+    title: retreat.title,
+    location: retreat.location,
+    startDate: retreat.startDate,
+    endDate: retreat.endDate,
+    spotsRemaining: retreat.spotsRemaining,
+    packages: retreat.packages.map((p) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description,
+      occupancy: p.occupancy,
+      images: p.images,
+      fullPrice: p.fullPrice,
+      depositAmount: p.depositAmount,
+      available: p.available,
+    })),
+  };
 
   if (retreat.spotsRemaining === 0) {
     return (
@@ -72,10 +70,7 @@ export default async function RegisterPage({ params }: Props) {
           <p className="prose-exhale mb-8">
             We'd love to add you to the waitlist and notify you if a place becomes available.
           </p>
-          <a
-            href="/contact"
-            className="label-md text-[#B89080] border-b border-current pb-px"
-          >
+          <a href="/contact" className="label-md text-[#B89080] border-b border-current pb-px">
             Join the waitlist
           </a>
         </div>
@@ -160,7 +155,6 @@ export default async function RegisterPage({ params }: Props) {
               }}
             >
               Your place is secured with a deposit. The remaining balance is due 30 days before the retreat.
-              All payments are processed securely via Stripe.
             </p>
             {retreat.spotsRemaining <= 5 && (
               <p
@@ -180,7 +174,7 @@ export default async function RegisterPage({ params }: Props) {
 
         {/* Right — form */}
         <div className="md:col-span-7 md:col-start-6">
-          <RegistrationForm retreat={retreat} />
+          <RegistrationForm retreat={registrationRetreat} />
         </div>
       </div>
     </div>
