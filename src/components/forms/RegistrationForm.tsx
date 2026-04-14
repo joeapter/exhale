@@ -6,6 +6,9 @@ import { formatCurrency } from "@/lib/utils";
 type Package = {
   id: string;
   name: string;
+  description?: string | null;
+  occupancy?: string | null;
+  images?: string[];
   fullPrice: number;
   depositAmount: number;
   available: number;
@@ -123,6 +126,10 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
     marginBottom: "0.25rem",
   };
 
+  function getPackageImage(pkg: Package) {
+    return pkg.images?.[0] || "/assets/desert-glamping-at-sunset.png";
+  }
+
   return (
     <div>
       {/* ── Step indicator — editorial text, not circles ── */}
@@ -169,87 +176,120 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               Choose your accommodation
             </h2>
 
-            {/* Package options — editorial rows, not boxes */}
-            <div className="mb-10">
-              {retreat.packages.map((p, i) => (
+            {/* Package options */}
+            <div className="mb-10 space-y-5">
+              {retreat.packages.map((p) => {
+                const isSelected = selectedPackage === p.id;
+                const isSoldOut = p.available === 0;
+                const occupancyText =
+                  p.occupancy?.trim() ||
+                  "Occupancy details provided after booking";
+                const descriptionText =
+                  p.description?.trim() ||
+                  "Beautifully appointed accommodation with full access to all retreat amenities.";
+
+                return (
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => p.available > 0 && setSelectedPackage(p.id)}
-                  disabled={p.available === 0}
-                  className="w-full text-left"
+                  onClick={() => !isSoldOut && setSelectedPackage(p.id)}
+                  disabled={isSoldOut}
+                  className="w-full text-left overflow-hidden"
                   style={{
-                    borderTop: i === 0 ? "1px solid rgba(184,144,128,0.2)" : "none",
-                    borderBottom: "1px solid rgba(184,144,128,0.2)",
-                    padding: "1.25rem 0",
-                    opacity: p.available === 0 ? 0.4 : 1,
-                    cursor: p.available === 0 ? "not-allowed" : "pointer",
-                    background: "none",
-                    transition: "opacity 0.2s ease",
+                    border: isSelected
+                      ? "1px solid rgba(184,144,128,0.65)"
+                      : "1px solid rgba(184,144,128,0.28)",
+                    opacity: isSoldOut ? 0.55 : 1,
+                    cursor: isSoldOut ? "not-allowed" : "pointer",
+                    background: isSelected ? "rgba(250,247,242,0.65)" : "rgba(250,247,242,0.35)",
+                    transition: "all 0.2s ease",
                   }}
                 >
-                  <div className="flex items-baseline justify-between gap-4">
-                    <div className="flex items-baseline gap-4">
-                      {/* Selection dot */}
-                      <span
-                        style={{
-                          display: "inline-block",
-                          width: "6px",
-                          height: "6px",
-                          borderRadius: "50%",
-                          background:
-                            selectedPackage === p.id
-                              ? "var(--color-clay)"
-                              : "transparent",
-                          border: `1px solid ${
-                            selectedPackage === p.id
-                              ? "var(--color-clay)"
-                              : "rgba(184,144,128,0.5)"
-                          }`,
-                          flexShrink: 0,
-                          marginBottom: "1px",
-                          transition: "all 0.2s ease",
-                        }}
+                  <div className="grid grid-cols-1 sm:grid-cols-[200px_1fr]">
+                    <div className="relative h-44 sm:h-auto min-h-[168px] bg-[#E5D6C4]">
+                      <img
+                        src={getPackageImage(p)}
+                        alt={`${p.name} accommodation`}
+                        className="absolute inset-0 h-full w-full object-cover"
                       />
-                      <span
+                    </div>
+                    <div className="p-5 sm:p-6">
+                      <div className="flex items-start justify-between gap-5 mb-3">
+                        <div className="flex items-baseline gap-3">
+                          {/* Selection dot */}
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: "7px",
+                              height: "7px",
+                              borderRadius: "50%",
+                              background: isSelected ? "var(--color-clay)" : "transparent",
+                              border: `1px solid ${isSelected ? "var(--color-clay)" : "rgba(184,144,128,0.5)"}`,
+                              flexShrink: 0,
+                              marginTop: "0.45rem",
+                              transition: "all 0.2s ease",
+                            }}
+                          />
+                          <span
+                            style={{
+                              fontFamily: "Cormorant Garamond, Georgia, serif",
+                              fontWeight: isSelected ? 400 : 300,
+                              fontSize: "clamp(1.25rem, 2vw, 1.55rem)",
+                              color: isSelected ? "var(--color-espresso)" : "var(--color-taupe)",
+                              lineHeight: 1.2,
+                              transition: "color 0.2s ease",
+                            }}
+                          >
+                            {p.name}
+                          </span>
+                        </div>
+
+                        <div className="shrink-0 text-right">
+                          <div
+                            style={{
+                              fontFamily: "Cormorant Garamond, Georgia, serif",
+                              fontWeight: 300,
+                              fontSize: "clamp(1.2rem, 1.8vw, 1.4rem)",
+                              color: "var(--color-espresso)",
+                              lineHeight: 1,
+                            }}
+                          >
+                            {formatCurrency(p.fullPrice)}
+                          </div>
+                          <div className="label-sm text-[#9B8F84] mt-1">or {formatCurrency(p.depositAmount)} deposit</div>
+                        </div>
+                      </div>
+
+                      <p
                         style={{
-                          fontFamily: "Cormorant Garamond, Georgia, serif",
-                          fontWeight: selectedPackage === p.id ? 400 : 300,
-                          fontSize: "clamp(1.125rem, 1.8vw, 1.375rem)",
-                          color:
-                            selectedPackage === p.id
-                              ? "var(--color-espresso)"
-                              : "var(--color-taupe)",
-                          transition: "color 0.2s ease",
+                          fontFamily: "Jost, system-ui, sans-serif",
+                          fontWeight: 300,
+                          fontSize: "0.875rem",
+                          lineHeight: 1.7,
+                          color: "var(--color-taupe)",
                         }}
                       >
-                        {p.name}
-                      </span>
-                      {p.available === 0 && (
-                        <span className="label-sm" style={{ color: "var(--color-taupe-light)" }}>
-                          Sold out
-                        </span>
-                      )}
-                      {p.available > 0 && p.available <= 2 && (
-                        <span className="label-sm" style={{ color: "var(--color-candle)" }}>
-                          {p.available} remaining
-                        </span>
-                      )}
+                        {descriptionText}
+                      </p>
+
+                      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <span className="label-sm text-[#9B8F84]">{occupancyText}</span>
+                        {isSoldOut && (
+                          <span className="label-sm" style={{ color: "var(--color-taupe-light)" }}>
+                            Sold out
+                          </span>
+                        )}
+                        {!isSoldOut && p.available <= 2 && (
+                          <span className="label-sm" style={{ color: "var(--color-candle)" }}>
+                            {p.available} remaining
+                          </span>
+                        )}
+                      </div>
                     </div>
-                    <span
-                      style={{
-                        fontFamily: "Cormorant Garamond, Georgia, serif",
-                        fontWeight: 300,
-                        fontSize: "clamp(1.125rem, 1.6vw, 1.25rem)",
-                        color: "var(--color-taupe)",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {formatCurrency(p.fullPrice)}
-                    </span>
                   </div>
                 </button>
-              ))}
+                );
+              })}
             </div>
 
             {/* Payment type */}
