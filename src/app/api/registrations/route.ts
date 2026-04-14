@@ -7,7 +7,7 @@ import { z } from "zod";
 const registrationSchema = z.object({
   retreatId: z.string(),
   packageId: z.string(),
-  paymentType: z.enum(["DEPOSIT", "FULL"]),
+  paymentType: z.enum(["DEPOSIT", "FULL"]).optional(),
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
@@ -16,6 +16,7 @@ const registrationSchema = z.object({
   dietaryNeeds: z.string().optional(),
   healthNotes: z.string().optional(),
   roomingPref: z.enum(["SOLO", "WITH_FRIEND", "NO_PREFERENCE"]),
+  friendName: z.string().optional(),
   additionalNotes: z.string().optional(),
   emergencyName: z.string().min(1),
   emergencyPhone: z.string().min(1),
@@ -43,8 +44,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "This package is no longer available." }, { status: 400 });
     }
 
-    const amountDue = data.paymentType === "DEPOSIT" ? pkg.depositAmount : pkg.fullPrice;
+    const paymentType = "DEPOSIT" as const;
+    const amountDue = pkg.depositAmount;
     const confirmationRef = generateConfirmationRef();
+    const additionalNotes = [
+      data.additionalNotes?.trim(),
+      data.roomingPref === "WITH_FRIEND" && data.friendName?.trim()
+        ? `Roommate request: ${data.friendName.trim()}`
+        : undefined,
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const registration = await prisma.registration.create({
       data: {
@@ -59,23 +69,17 @@ export async function POST(req: NextRequest) {
         dietaryNeeds: data.dietaryNeeds,
         healthNotes: data.healthNotes,
         roomingPref: data.roomingPref,
-        additionalNotes: data.additionalNotes,
+        additionalNotes: additionalNotes || undefined,
         emergencyName: data.emergencyName,
         emergencyPhone: data.emergencyPhone,
         emergencyRel: data.emergencyRel,
-        paymentType: data.paymentType,
+        paymentType,
         amountDue,
         confirmationRef,
       },
     });
 
-    // Mark confirmed immediately (Stripe not yet wired up)
-    await prisma.registration.update({
-      where: { id: registration.id },
-      data: { status: "CONFIRMED", confirmedAt: new Date() },
-    });
-
-    // Decrement spots
+    // Hold the place pending deposit payment.
     await prisma.retreat.update({
       where: { id: data.retreatId },
       data: { spotsRemaining: { decrement: 1 } },
@@ -88,13 +92,14 @@ export async function POST(req: NextRequest) {
       email: data.email,
       phone: data.phone,
       packageName: pkg.name,
-      paymentType: data.paymentType,
+      paymentType,
       amountDue,
       confirmationRef,
       roomingPref: data.roomingPref,
+      friendName: data.friendName?.trim(),
       dietaryNeeds: data.dietaryNeeds,
       healthNotes: data.healthNotes,
-      additionalNotes: data.additionalNotes,
+      additionalNotes: additionalNotes || undefined,
       emergencyName: data.emergencyName,
       emergencyPhone: data.emergencyPhone,
       emergencyRel: data.emergencyRel,

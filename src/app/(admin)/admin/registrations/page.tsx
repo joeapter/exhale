@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import MarkDepositPaidButton from "@/components/admin/MarkDepositPaidButton";
 
 export default async function AdminRegistrationsPage() {
   const session = await getAdminSession();
@@ -17,7 +18,7 @@ export default async function AdminRegistrationsPage() {
   });
 
   const total = registrations.length;
-  const confirmed = registrations.filter((r) => r.status === "CONFIRMED").length;
+  const reserved = registrations.filter((r) => r.status === "CONFIRMED").length;
   const pending = registrations.filter((r) => r.status === "PENDING").length;
 
   const statusColor: Record<string, { color: string; bg: string }> = {
@@ -26,6 +27,10 @@ export default async function AdminRegistrationsPage() {
     WAITLISTED: { color: "rgba(100,100,180,1)", bg: "rgba(100,100,180,0.1)" },
     CANCELED: { color: "rgba(180,100,100,1)", bg: "rgba(180,100,100,0.1)" },
     REFUNDED: { color: "rgba(155,143,132,1)", bg: "rgba(155,143,132,0.1)" },
+  };
+
+  const statusLabel: Record<string, string> = {
+    CONFIRMED: "RESERVED",
   };
 
   return (
@@ -61,7 +66,7 @@ export default async function AdminRegistrationsPage() {
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
           { label: "Total", value: total },
-          { label: "Confirmed", value: confirmed },
+          { label: "Reserved", value: reserved },
           { label: "Pending", value: pending },
         ].map((stat) => (
           <div
@@ -142,19 +147,26 @@ export default async function AdminRegistrationsPage() {
                         background: statusColor[r.status]?.bg ?? "transparent",
                       }}
                     >
-                      {r.status}
+                      {statusLabel[r.status] ?? r.status}
                     </span>
                   </td>
                   <td className="px-4 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.8125rem", color: "var(--color-taupe-light)" }}>
                     {formatDate(r.createdAt)}
                   </td>
                   <td className="px-4 py-4">
-                    <Link
-                      href={`/admin/registrations/${r.id}`}
-                      className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors"
-                    >
-                      View
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      {r.paymentType === "DEPOSIT" && r.status === "PENDING" ? (
+                        <MarkDepositPaidButton registrationId={r.id} />
+                      ) : (
+                        <span className="label-sm text-[#B89080]/60">-</span>
+                      )}
+                      <Link
+                        href={`/admin/registrations/${r.id}`}
+                        className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors"
+                      >
+                        View
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

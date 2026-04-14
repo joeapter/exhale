@@ -39,7 +39,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
   const [selectedPackage, setSelectedPackage] = useState<string>(
     retreat.packages[0]?.id ?? ""
   );
-  const [paymentType, setPaymentType] = useState<"DEPOSIT" | "FULL">("DEPOSIT");
+  const paymentType = "DEPOSIT" as const;
 
   const [form, setForm] = useState({
     firstName: "",
@@ -49,7 +49,8 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
     dateOfBirth: "",
     dietaryNeeds: "",
     healthNotes: "",
-    roomingPref: "NO_PREFERENCE" as "SOLO" | "WITH_FRIEND" | "NO_PREFERENCE",
+    roomingPref: "NO_PREFERENCE" as "WITH_FRIEND" | "NO_PREFERENCE",
+    friendName: "",
     additionalNotes: "",
     emergencyName: "",
     emergencyPhone: "",
@@ -262,20 +263,31 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                       </button>
 
                       {packageImages.length > 1 && (
-                        <div className="flex items-center gap-2 p-2 bg-[#F4EBDD]">
+                        <div
+                          className="flex items-center gap-2 p-2.5"
+                          style={{
+                            background: "rgba(255,255,255,0.88)",
+                            borderTop: "1px solid rgba(184,144,128,0.18)",
+                            borderRadius: "0 0 12px 12px",
+                          }}
+                        >
                           <button
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
                               setPackageImageIndex(p.id, activeImageIndex - 1, packageImages.length);
                             }}
-                            className="h-7 w-7 shrink-0 rounded-full border border-[#D1C0AE] text-[#8A7563]"
+                            className="h-8 w-8 shrink-0 rounded-full border text-[#8A7563]"
+                            style={{
+                              borderColor: "rgba(184,144,128,0.4)",
+                              background: "rgba(250,247,242,0.96)",
+                            }}
                             aria-label={`Previous ${p.name} image`}
                           >
                             {"<"}
                           </button>
 
-                          <div className="flex gap-2 overflow-x-auto">
+                          <div className="flex flex-1 items-center justify-center gap-1.5 overflow-hidden">
                             {packageImages.map((imgSrc, idx) => (
                               <button
                                 key={`${p.id}-${idx}`}
@@ -290,6 +302,11 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                                     idx === activeImageIndex
                                       ? "1px solid #8A7563"
                                       : "1px solid rgba(138,117,99,0.35)",
+                                  borderRadius: "8px",
+                                  boxShadow:
+                                    idx === activeImageIndex
+                                      ? "0 2px 10px rgba(61,46,34,0.12)"
+                                      : "0 1px 6px rgba(61,46,34,0.06)",
                                 }}
                                 aria-label={`View ${p.name} image ${idx + 1}`}
                               >
@@ -308,7 +325,11 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                               event.stopPropagation();
                               setPackageImageIndex(p.id, activeImageIndex + 1, packageImages.length);
                             }}
-                            className="h-7 w-7 shrink-0 rounded-full border border-[#D1C0AE] text-[#8A7563]"
+                            className="h-8 w-8 shrink-0 rounded-full border text-[#8A7563]"
+                            style={{
+                              borderColor: "rgba(184,144,128,0.4)",
+                              background: "rgba(250,247,242,0.96)",
+                            }}
                             aria-label={`Next ${p.name} image`}
                           >
                             {">"}
@@ -395,92 +416,18 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               })}
             </div>
 
-            {/* Payment type */}
             {pkg && (
-              <div className="mb-10">
-                <div
-                  style={{
-                    fontFamily: "Jost, system-ui, sans-serif",
-                    fontWeight: 400,
-                    fontSize: "0.6875rem",
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: "var(--color-taupe-light)",
-                    marginBottom: "1.25rem",
-                  }}
-                >
-                  Payment option
-                </div>
-                <div className="space-y-5">
-                  {[
-                    {
-                      value: "DEPOSIT" as const,
-                      label: "Pay deposit now",
-                      sublabel: `${formatCurrency(pkg.depositAmount)} today — balance due 30 days before retreat`,
-                    },
-                    {
-                      value: "FULL" as const,
-                      label: "Pay in full",
-                      sublabel: `${formatCurrency(pkg.fullPrice)} — no further payment required`,
-                    },
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => setPaymentType(option.value)}
-                      className="w-full text-left"
-                      style={{ background: "none", padding: 0, cursor: "pointer" }}
-                    >
-                      <div className="flex items-baseline gap-4">
-                        <span
-                          style={{
-                            display: "inline-block",
-                            width: "6px",
-                            height: "6px",
-                            borderRadius: "50%",
-                            background:
-                              paymentType === option.value
-                                ? "var(--color-clay)"
-                                : "transparent",
-                            border: `1px solid ${
-                              paymentType === option.value
-                                ? "var(--color-clay)"
-                                : "rgba(184,144,128,0.5)"
-                            }`,
-                            flexShrink: 0,
-                            marginBottom: "1px",
-                            transition: "all 0.2s ease",
-                          }}
-                        />
-                        <div>
-                          <div
-                            style={{
-                              fontFamily: "Jost, system-ui, sans-serif",
-                              fontWeight: paymentType === option.value ? 400 : 300,
-                              fontSize: "0.9375rem",
-                              color: "var(--color-espresso)",
-                              transition: "font-weight 0.2s ease",
-                            }}
-                          >
-                            {option.label}
-                          </div>
-                          <div
-                            style={{
-                              fontFamily: "Jost, system-ui, sans-serif",
-                              fontWeight: 300,
-                              fontSize: "0.8125rem",
-                              color: "var(--color-taupe-light)",
-                              marginTop: "0.15rem",
-                            }}
-                          >
-                            {option.sublabel}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p
+                className="mb-10"
+                style={{
+                  fontFamily: "Jost, system-ui, sans-serif",
+                  fontWeight: 300,
+                  fontSize: "0.875rem",
+                  color: "var(--color-taupe)",
+                }}
+              >
+                Deposit due after reservation: {formatCurrency(pkg.depositAmount)}
+              </p>
             )}
 
             <button
@@ -582,7 +529,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               </div>
 
               <div>
-                <label style={labelStyle}>Rooming preference</label>
+                <label style={labelStyle}>Roommate request</label>
                 <select
                   name="roomingPref"
                   value={form.roomingPref}
@@ -590,10 +537,22 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   style={{ ...fieldStyle, appearance: "none" as const }}
                 >
                   <option value="NO_PREFERENCE">No preference</option>
-                  <option value="SOLO">I prefer my own space</option>
-                  <option value="WITH_FRIEND">I&apos;m coming with a friend (please pair us)</option>
+                  <option value="WITH_FRIEND">I&apos;m coming with a friend, please pair us</option>
                 </select>
               </div>
+
+              {form.roomingPref === "WITH_FRIEND" && (
+                <div>
+                  <label style={labelStyle}>Friend&apos;s name</label>
+                  <input
+                    name="friendName"
+                    value={form.friendName}
+                    onChange={handleChange}
+                    placeholder="First and last name"
+                    style={fieldStyle}
+                  />
+                </div>
+              )}
 
               <div>
                 <div
@@ -674,6 +633,10 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                     setError("Please fill in all required fields.");
                     return;
                   }
+                  if (form.roomingPref === "WITH_FRIEND" && !form.friendName.trim()) {
+                    setError("Please add your friend's name for roommate pairing.");
+                    return;
+                  }
                   setError(null);
                   setStep(3);
                 }}
@@ -752,7 +715,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               </div>
 
               <div>
-                <label style={labelStyle}>Anything else you'd like to share</label>
+                <label style={labelStyle}>Anything else you&apos;d like to share</label>
                 <textarea
                   name="additionalNotes"
                   value={form.additionalNotes}
@@ -803,7 +766,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   style={{ borderTop: "1px solid rgba(184,144,128,0.2)" }}
                 >
                   <span style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.9375rem", color: "var(--color-espresso)" }}>
-                    {paymentType === "DEPOSIT" ? "Deposit due today" : "Total due today"}
+                    Deposit due
                   </span>
                   <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontWeight: 300, fontSize: "1.375rem", color: "var(--color-espresso)" }}>
                     {formatCurrency(amountDue)}
@@ -854,7 +817,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   cursor: loading ? "not-allowed" : "pointer",
                 }}
               >
-                {loading ? "Preparing checkout…" : `Reserve — ${formatCurrency(amountDue)}`}
+                {loading ? "Submitting…" : "Reserve Now"}
               </button>
             </div>
 
@@ -862,7 +825,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               className="mt-4 text-center"
               style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}
             >
-              Payments processed securely by Stripe.
+              After reserving, you&apos;ll see deposit payment details.
             </p>
           </div>
         )}
