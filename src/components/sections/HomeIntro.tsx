@@ -23,10 +23,11 @@ export default function HomeIntro() {
             }}
           >
             <Image
-              src="/assets/noor/bonfire.webp"
-              alt="Evening bonfire at Noor Glamping"
+              src="/assets/7.webp"
+              alt="Desert retreat view at Noor Glamping"
               fill
-              className="object-cover"
+              className="object-cover object-left"
+              style={{ objectPosition: "left center" }}
               sizes="(max-width: 768px) 100vw, 40vw"
             />
           </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import MarkDepositPaidButton from "@/components/admin/MarkDepositPaidButton";
+import DeleteRegistrationButton from "@/components/admin/DeleteRegistrationButton";
 
 export default async function AdminRegistrationsPage() {
   const session = await getAdminSession();
@@ -157,15 +158,17 @@ export default async function AdminRegistrationsPage() {
                     <div className="flex items-center gap-3">
                       {r.paymentType === "DEPOSIT" && r.status === "PENDING" ? (
                         <MarkDepositPaidButton registrationId={r.id} />
-                      ) : (
-                        <span className="label-sm text-[#B89080]/60">-</span>
-                      )}
+                      ) : null}
                       <Link
                         href={`/admin/registrations/${r.id}`}
                         className="label-sm text-[#B89080] hover:text-[#7A6A5A] transition-colors"
                       >
                         View
                       </Link>
+                      <DeleteRegistrationButton
+                        registrationId={r.id}
+                        guestName={`${r.firstName} ${r.lastName}`}
+                      />
                     </div>
                   </td>
                 </tr>
