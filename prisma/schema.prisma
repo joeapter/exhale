@@ -69,6 +69,8 @@ model Retreat {
   // Relations
   faqs           RetreatFaq[]
   registrations  Registration[]
+  rooms          Room[]
+  expenses       Expense[]
 
   // Meta
   seoTitle       String?
@@ -149,12 +151,19 @@ model Registration {
   emergencyPhone  String?
   emergencyRel    String?
 
+  // Room assignment
+  roomId          String?
+  room            Room?              @relation(fields: [roomId], references: [id], onDelete: SetNull)
+
   // Payment
   paymentType     PaymentType        @default(FULL)
   payments        Payment[]
   stripeSessionId String?
   amountDue       Int
   amountPaid      Int                @default(0)
+
+  // Staff
+  isStaff         Boolean            @default(false)
 
   // Confirmation
   confirmedAt     DateTime?
@@ -222,6 +231,20 @@ enum PaymentMethod {
 // CONTENT
 // ─────────────────────────────────────────────────────
 
+model Facilitator {
+  id        String   @id @default(cuid())
+  name      String
+  title     String?
+  image     String?
+  bio       String   @db.Text
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("facilitators")
+}
+
 model Testimonial {
   id         String   @id @default(cuid())
   name       String
@@ -276,4 +299,55 @@ enum ContentType {
   RICHTEXT
   IMAGE_URL
   JSON
+}
+
+// ─────────────────────────────────────────────────────
+// ROOM ORGANIZER
+// ─────────────────────────────────────────────────────
+
+model Room {
+  id            String         @id @default(cuid())
+  retreatId     String
+  retreat       Retreat        @relation(fields: [retreatId], references: [id], onDelete: Cascade)
+  name          String
+  capacity      Int
+  sortOrder     Int            @default(0)
+  registrations Registration[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("rooms")
+}
+
+// ─────────────────────────────────────────────────────
+// MAILING LIST
+// ─────────────────────────────────────────────────────
+
+model MailingListSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  firstName String?
+  source    String?
+  createdAt DateTime @default(now())
+
+  @@map("mailing_list_subscribers")
+}
+
+// ─────────────────────────────────────────────────────
+// EXPENSES
+// ─────────────────────────────────────────────────────
+
+model Expense {
+  id          String   @id @default(cuid())
+  retreatId   String?
+  retreat     Retreat? @relation(fields: [retreatId], references: [id], onDelete: SetNull)
+  description String
+  amount      Int      // agorot
+  category    String?
+  date        DateTime @default(now())
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("expenses")
 }

@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     }
 
     const paymentType = "DEPOSIT" as const;
-    const amountDue = pkg.depositAmount;
+    const amountDue = pkg.fullPrice;
     const confirmationRef = generateConfirmationRef();
     const additionalNotes = [
       data.additionalNotes?.trim(),
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       data: { spotsRemaining: { decrement: 1 } },
     });
 
-    // Send emails (non-blocking — don't fail the registration if email fails)
+    // Send emails — awaited so they complete before the serverless function exits
     const emailData = {
       firstName: data.firstName,
       lastName: data.lastName,
@@ -104,10 +104,15 @@ export async function POST(req: NextRequest) {
       emergencyPhone: data.emergencyPhone,
       emergencyRel: data.emergencyRel,
     };
-    Promise.all([
-      sendRegistrationConfirmation(emailData),
-      sendRegistrationNotification(emailData),
-    ]).catch((err) => console.error("Email send error:", err));
+    try {
+      await Promise.all([
+        sendRegistrationConfirmation(emailData),
+        sendRegistrationNotification(emailData),
+      ]);
+    } catch (err) {
+      // Email failure must not block the registration confirmation
+      console.error("Email send error:", err);
+    }
 
     return NextResponse.json({
       checkoutUrl: `/register/confirmation?ref=${confirmationRef}`,

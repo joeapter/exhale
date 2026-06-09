@@ -230,3 +230,436 @@ img, video { max-width: 100%; display: block; }
 .py-section    { padding-top: var(--section);    padding-bottom: var(--section); }
 .py-section-sm { padding-top: var(--section-sm); padding-bottom: var(--section-sm); }
 .px-gutter     { padding-left: var(--gutter);    padding-right: var(--gutter); }
+
+/* ─── Admin registration PDF printing ─── */
+.registration-print-root {
+  display: none;
+}
+
+/* ─── Admin room organizer printing ─── */
+.rooms-print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #30251d !important;
+    overflow: visible !important;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  header,
+  .registration-screen-root,
+  .rooms-screen-root {
+    display: none !important;
+  }
+
+  main {
+    padding-top: 0 !important;
+  }
+
+  .min-h-screen {
+    min-height: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .registrations-admin-page,
+  .rooms-admin-page {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .registration-print-root {
+    display: block !important;
+    font-family: "Jost", Arial, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #30251d;
+  }
+
+  .registration-pdf-sheet {
+    min-height: calc(297mm - 24mm);
+    break-after: page;
+    page-break-after: always;
+    background: #ffffff;
+  }
+
+  .registration-pdf-sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .registration-pdf-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12mm;
+    padding-bottom: 7mm;
+    margin-bottom: 5mm;
+    border-bottom: 1px solid #d9cbbb;
+  }
+
+  .registration-pdf-kicker {
+    font-family: "Jost", Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9b7d6f;
+    margin-bottom: 2mm;
+  }
+
+  .registration-pdf-header h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 28pt;
+    font-weight: 300;
+    line-height: 1.02;
+    color: #30251d;
+    margin: 0;
+  }
+
+  .registration-pdf-subtitle {
+    font-family: "Jost", Arial, sans-serif;
+    font-size: 10pt;
+    font-weight: 300;
+    line-height: 1.5;
+    color: #6f5f50;
+    margin-top: 2mm;
+  }
+
+  .registration-pdf-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 1.5mm;
+    min-width: 38mm;
+    font-family: "Jost", Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7a6a5a;
+    text-align: right;
+  }
+
+  .registration-pdf-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 7mm;
+    padding: 1.2mm 3mm;
+    border: 1px solid #b89080;
+    font-size: 7.5pt;
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .registration-pdf-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3mm;
+    margin-bottom: 5mm;
+  }
+
+  .registration-pdf-summary > div {
+    min-height: 17mm;
+    padding: 3mm;
+    background: #faf7f2;
+    border: 1px solid #e3d7c8;
+  }
+
+  .registration-pdf-summary span {
+    display: block;
+    font-size: 7pt;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9b8f84;
+    margin-bottom: 1.2mm;
+  }
+
+  .registration-pdf-summary strong {
+    display: block;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 16pt;
+    font-weight: 400;
+    line-height: 1.05;
+    color: #30251d;
+  }
+
+  .registration-pdf-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4mm;
+  }
+
+  .registration-pdf-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 4mm;
+    border: 1px solid #e3d7c8;
+    background: #ffffff;
+  }
+
+  .registration-pdf-section-full {
+    grid-column: 1 / -1;
+  }
+
+  .registration-pdf-section h2 {
+    font-family: "Jost", Arial, sans-serif;
+    font-size: 7.5pt;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    line-height: 1.35;
+    text-transform: uppercase;
+    color: #9b7d6f;
+    margin: 0 0 2mm;
+  }
+
+  .registration-pdf-field {
+    display: grid;
+    grid-template-columns: 29mm minmax(0, 1fr);
+    gap: 3mm;
+    padding: 1.8mm 0;
+    border-top: 1px solid #eee6dc;
+  }
+
+  .registration-pdf-field:first-of-type {
+    border-top: 0;
+  }
+
+  .registration-pdf-field-wide {
+    grid-template-columns: 24mm minmax(0, 1fr);
+  }
+
+  .registration-pdf-field-label {
+    font-size: 7.5pt;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9b8f84;
+  }
+
+  .registration-pdf-field-value {
+    min-width: 0;
+    font-size: 9.5pt;
+    font-weight: 300;
+    color: #30251d;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .registration-pdf-events {
+    display: grid;
+    gap: 2mm;
+  }
+
+  .registration-pdf-event {
+    display: grid;
+    grid-template-columns: 38mm minmax(0, 1fr);
+    gap: 4mm;
+    padding: 2mm 0;
+    border-top: 1px solid #eee6dc;
+  }
+
+  .registration-pdf-event:first-child {
+    border-top: 0;
+  }
+
+  .registration-pdf-event div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6mm;
+  }
+
+  .registration-pdf-event strong {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 13pt;
+    font-weight: 400;
+    line-height: 1;
+    color: #30251d;
+  }
+
+  .registration-pdf-event span {
+    font-size: 8pt;
+    font-weight: 300;
+    color: #6f5f50;
+    overflow-wrap: anywhere;
+  }
+
+  /* ── Room organizer print styles ── */
+
+  .rooms-print-root {
+    display: block !important;
+    font-family: "Jost", Arial, sans-serif;
+    font-size: 9.5pt;
+    line-height: 1.45;
+    color: #30251d;
+  }
+
+  .rooms-print-header {
+    padding-bottom: 6mm;
+    margin-bottom: 4mm;
+    border-bottom: 1px solid #d9cbbb;
+  }
+
+  .rooms-print-kicker {
+    font-size: 7.5pt;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #9b7d6f;
+    margin-bottom: 2mm;
+  }
+
+  .rooms-print-header h1 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: 26pt;
+    font-weight: 300;
+    line-height: 1.02;
+    color: #30251d;
+    margin: 0 0 1.5mm;
+  }
+
+  .rooms-print-subtitle {
+    font-size: 9pt;
+    font-weight: 300;
+    color: #6f5f50;
+    margin: 0;
+  }
+
+  .rooms-print-stats {
+    display: flex;
+    gap: 6mm;
+    margin-bottom: 5mm;
+    font-size: 8pt;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: #9b8f84;
+  }
+
+  .rooms-print-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4mm;
+    margin-bottom: 6mm;
+  }
+
+  .rooms-print-room {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #e3d7c8;
+    padding: 3mm 3.5mm;
+    background: #ffffff;
+  }
+
+  .rooms-print-room-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 3mm;
+    padding-bottom: 2mm;
+    margin-bottom: 2.5mm;
+    border-bottom: 1px solid #eee6dc;
+  }
+
+  .rooms-print-room-name {
+    font-size: 9.5pt;
+    font-weight: 400;
+    color: #30251d;
+  }
+
+  .rooms-print-room-cap {
+    font-size: 7.5pt;
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    color: #9b8f84;
+    white-space: nowrap;
+  }
+
+  .rooms-print-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .rooms-print-list li {
+    display: flex;
+    align-items: baseline;
+    gap: 2mm;
+    padding: 1.4mm 0;
+    border-top: 1px solid #eee6dc;
+  }
+
+  .rooms-print-list li:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .rooms-print-num {
+    font-size: 7.5pt;
+    color: #9b8f84;
+    width: 5mm;
+    flex-shrink: 0;
+  }
+
+  .rooms-print-name {
+    flex: 1;
+    font-size: 9.5pt;
+    font-weight: 300;
+    color: #30251d;
+  }
+
+  .rooms-print-pkg {
+    font-size: 7.5pt;
+    font-weight: 300;
+    color: #9b8f84;
+    white-space: nowrap;
+  }
+
+  .rooms-print-empty {
+    font-size: 8pt;
+    font-weight: 300;
+    font-style: italic;
+    color: #c9baa8;
+  }
+
+  .rooms-print-unassigned {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-top: 6mm;
+    padding-top: 4mm;
+    border-top: 1px solid #d9cbbb;
+  }
+
+  .rooms-print-unassigned-title {
+    font-size: 7.5pt;
+    font-weight: 400;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9b8f84;
+    margin-bottom: 2.5mm;
+  }
+
+  .rooms-print-unassigned-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2mm 6mm;
+    font-size: 9pt;
+    font-weight: 300;
+    color: #6f5f50;
+  }
+}

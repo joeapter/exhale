@@ -102,8 +102,8 @@ export default function AboutPage() {
               <p>
                 EXHALE was born from a simple observation: the women around
                 us — brilliant, generous, capable women — were running on empty.
-                Not because they hadn't tried to rest. But because the places
-                they went to rest weren't actually restful.
+                Not because they hadn&apos;t tried to rest. But because the places
+                they went to rest weren&apos;t actually restful.
               </p>
               <p>
                 We wanted something different. Something honest and beautiful

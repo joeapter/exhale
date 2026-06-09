@@ -91,7 +91,7 @@ export default function ContactForm() {
             lineHeight: 1.8,
           }}
         >
-          We've received your message and will be in touch within 2 business days.
+          We&apos;ve received your message and will be in touch within 2 business days.
         </p>
       </div>
     );

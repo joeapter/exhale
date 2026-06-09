@@ -62,7 +62,7 @@ export default function HomeIntro() {
           </p>
 
           <p className="prose-exhale" style={{ maxWidth: "44ch", marginBottom: "2rem" }}>
-            We've curated an amazing, inspirational program that will revive your body and soul.
+            We&apos;ve curated an amazing, inspirational program that will revive your body and soul.
           </p>
 
           <a

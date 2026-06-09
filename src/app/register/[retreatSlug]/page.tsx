@@ -68,7 +68,7 @@ export default async function RegisterPage({ params }: Props) {
             This retreat is fully booked.
           </h1>
           <p className="prose-exhale mb-8">
-            We'd love to add you to the waitlist and notify you if a place becomes available.
+            We&apos;d love to add you to the waitlist and notify you if a place becomes available.
           </p>
           <a href="/contact" className="label-md text-[#B89080] border-b border-current pb-px">
             Join the waitlist

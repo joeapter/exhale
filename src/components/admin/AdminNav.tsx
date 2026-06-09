@@ -7,7 +7,11 @@ const navItems = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/retreats", label: "Retreats" },
   { href: "/admin/registrations", label: "Registrations" },
+  { href: "/admin/expenses", label: "Expenses" },
+  { href: "/admin/subscribers", label: "Subscribers" },
+  { href: "/admin/rooms", label: "Rooms" },
   { href: "/admin/content", label: "Content" },
+  { href: "/admin/facilitators", label: "Facilitators" },
   { href: "/admin/faqs", label: "FAQs" },
   { href: "/admin/testimonials", label: "Testimonials" },
 ];

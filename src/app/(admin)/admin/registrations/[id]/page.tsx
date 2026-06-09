@@ -4,6 +4,8 @@ import { getAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import MarkDepositPaidButton from "@/components/admin/MarkDepositPaidButton";
+import MarkPaidFullButton from "@/components/admin/MarkPaidFullButton";
+import MarkStaffButton from "@/components/admin/MarkStaffButton";
 import DeleteRegistrationButton from "@/components/admin/DeleteRegistrationButton";
 
 type Props = {
@@ -96,10 +98,40 @@ export default async function RegistrationDetailPage({ params }: Props) {
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          {registration.paymentType === "DEPOSIT" &&
-            registration.status === "PENDING" && (
-              <MarkDepositPaidButton registrationId={registration.id} />
+          {registration.isStaff && (
+            <span
+              className="label-sm px-2 py-0.5"
+              style={{
+                color: "rgba(100,100,180,1)",
+                background: "rgba(100,100,180,0.1)",
+              }}
+            >
+              Staff
+            </span>
+          )}
+          {!registration.isStaff &&
+            registration.status !== "CANCELED" &&
+            registration.status !== "REFUNDED" && (
+              <MarkPaidFullButton
+                registrationId={registration.id}
+                paidFull={registration.amountPaid >= registration.amountDue}
+              />
             )}
+          {!registration.isStaff &&
+            registration.paymentType === "DEPOSIT" &&
+            registration.amountPaid < registration.amountDue &&
+            registration.amountPaid < (registration.package?.depositAmount ?? registration.amountDue) &&
+            (registration.status === "PENDING" ||
+              registration.status === "CONFIRMED") && (
+              <MarkDepositPaidButton
+                registrationId={registration.id}
+                depositPaid={false}
+              />
+            )}
+          <MarkStaffButton
+            registrationId={registration.id}
+            isStaff={registration.isStaff}
+          />
           <DeleteRegistrationButton
             registrationId={registration.id}
             guestName={`${registration.firstName} ${registration.lastName}`}
