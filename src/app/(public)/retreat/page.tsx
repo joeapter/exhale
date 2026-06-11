@@ -4,6 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
+import { getSiteImages } from "@/lib/site-images";
 
 export const metadata: Metadata = {
   title: "EXHALE Desert Escape",
@@ -23,19 +24,27 @@ function nightsBetween(start: Date, end: Date) {
 }
 
 export default async function RetreatPage() {
-  const retreat = await prisma.retreat.findFirst({
-    where: {
-      status: { in: ["PUBLISHED", "SOLD_OUT"] },
-      startDate: { gt: new Date() },
-    },
-    orderBy: { startDate: "asc" },
-    include: {
-      packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
-      faqs: { orderBy: { sortOrder: "asc" } },
-    },
-  });
+  const [retreat, imgs] = await Promise.all([
+    prisma.retreat.findFirst({
+      where: {
+        status: { in: ["PUBLISHED", "SOLD_OUT"] },
+        startDate: { gt: new Date() },
+      },
+      orderBy: { startDate: "asc" },
+      include: {
+        packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
+        faqs: { orderBy: { sortOrder: "asc" } },
+      },
+    }),
+    getSiteImages(),
+  ]);
 
   if (!retreat) redirect("/retreats");
+
+  const heroSrc  = imgs["hero_retreat"]  ?? "/assets/noor/grounds.webp";
+  const gallery1 = imgs["gallery_1"]     ?? "/assets/noor/interior.webp";
+  const gallery2 = imgs["gallery_2"]     ?? "/assets/noor/bed.webp";
+  const gallery3 = imgs["gallery_3"]     ?? "/assets/noor/lounge.webp";
 
   const lowestPrice = Math.min(...retreat.packages.map((p) => p.fullPrice));
   const dates = formatRetreatDates(retreat.startDate, retreat.endDate);
@@ -66,8 +75,8 @@ export default async function RetreatPage() {
       <section className="relative overflow-hidden" style={{ minHeight: "80vh", display: "flex", alignItems: "flex-end" }}>
         <div className="absolute inset-0">
           <Image
-            src="/assets/noor/grounds.webp"
-            alt="Noor Glamping"
+            src={heroSrc}
+            alt="Retreat venue"
             fill
             priority
             className="object-cover object-center"
@@ -283,11 +292,11 @@ export default async function RetreatPage() {
           style={{ paddingLeft: "var(--gutter)", paddingRight: "var(--gutter)" }}
         >
           {[
-            { src: "/assets/noor/interior.webp", alt: "Tent interior" },
-            { src: "/assets/noor/bed.webp", alt: "Sleeping tent" },
-            { src: "/assets/noor/lounge.webp", alt: "Lounge space" },
-          ].map((img) => (
-            <div key={img.src} className="relative overflow-hidden" style={{ aspectRatio: "4/5" }}>
+            { src: gallery1, alt: "Retreat space" },
+            { src: gallery2, alt: "Retreat space" },
+            { src: gallery3, alt: "Retreat space" },
+          ].map((img, i) => (
+            <div key={i} className="relative overflow-hidden" style={{ aspectRatio: "4/5" }}>
               <Image
                 src={img.src}
                 alt={img.alt}

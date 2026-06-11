@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-const HERO_IMAGE = "/assets/desert-glamping-at-sunset.png";
-
 export default function HomeHero({
   retreatEyebrow,
   hasUpcomingRetreat,
+  heroImage,
 }: {
   retreatEyebrow: string;
   hasUpcomingRetreat: boolean;
+  heroImage: string;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +38,7 @@ export default function HomeHero({
       {/* ── Hero image background ── */}
       <div className="absolute inset-0" aria-hidden>
         <Image
-          src={HERO_IMAGE}
+          src={heroImage}
           alt=""
           fill
           priority

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import MailingListForm from "@/components/layout/MailingListForm";
+import { getSiteImage } from "@/lib/site-images";
 
-export default function Footer() {
+export default async function Footer() {
   const year = new Date().getFullYear();
+  const footerLogo = await getSiteImage("logo_footer");
 
   return (
     <footer className="bg-[#3D2E22] text-[#E4D8C9]" style={{ paddingTop: "var(--section)", paddingBottom: "3rem" }}>
@@ -140,7 +142,7 @@ export default function Footer() {
               className="opacity-75 hover:opacity-100 transition-opacity duration-200"
             >
               <Image
-                src="/assets/Elevate Events Logo .png"
+                src={footerLogo}
                 alt="Elevate Events"
                 width={90}
                 height={90}

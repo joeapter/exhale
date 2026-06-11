@@ -1,14 +1,17 @@
 import Image from "next/image";
+import { getSiteImage } from "@/lib/site-images";
 
-export default function HomeAtmosphere() {
+export default async function HomeAtmosphere() {
+  const src = await getSiteImage("atmosphere_home");
+
   return (
     <section className="relative overflow-hidden" aria-label="The place">
 
       {/* Full-bleed photo */}
       <div className="relative overflow-hidden" style={{ minHeight: "70vh" }}>
         <Image
-          src="/assets/noor/fire.webp"
-          alt="Evening fire at Noor Glamping"
+          src={src}
+          alt="Evening atmosphere"
           fill
           className="object-cover object-center"
           sizes="100vw"
