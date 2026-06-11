@@ -29,6 +29,27 @@
   --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ─── Footer semantic tokens ─── */
+:root {
+  --footer-bg:           #3D2E22;
+  --footer-border:       #5C4A38;
+  --footer-text-bright:  #FAF7F2;
+  --footer-text:         #E4D8C9;
+  --footer-text-muted:   #9B8F84;
+  --footer-text-dim:     #7A6A5A;
+  --footer-text-faint:   #5C4A38;
+}
+
+[data-theme="forest"] {
+  --footer-bg:           #0D1210;
+  --footer-border:       rgba(122, 148, 102, 0.18);
+  --footer-text-bright:  #F5F0E8;
+  --footer-text:         #C8C0B0;
+  --footer-text-muted:   #9B9690;
+  --footer-text-dim:     #7A9466;
+  --footer-text-faint:   rgba(122, 148, 102, 0.4);
+}
+
 /* ─── Forest theme overrides ─── */
 /* All CSS vars cascade to children of [data-theme="forest"] */
 [data-theme="forest"] {
@@ -118,6 +139,11 @@
 [data-theme="forest"] .field-base::placeholder {
   color: #9B9690;
 }
+
+/* ─── Footer link hover ─── */
+.footer-link:hover       { color: var(--footer-text-bright) !important; }
+.footer-link-faint       { color: var(--footer-text-faint); }
+.footer-link-faint:hover { color: var(--footer-text-muted); }
 
 /* ─── Base ─── */
 *, *::before, *::after { box-sizing: border-box; }
