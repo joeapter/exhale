@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cancelOpenBalancePaymentLinks } from "@/lib/payment-links";
 
 export async function PATCH(
   req: NextRequest,
@@ -27,13 +28,20 @@ export async function PATCH(
   try {
     const registration = await prisma.registration.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, amountPaid: true },
     });
 
     if (!registration) {
       return NextResponse.json({ error: "Registration not found." }, { status: 404 });
     }
+    if (amountDue < registration.amountPaid) {
+      return NextResponse.json(
+        { error: "Amount due cannot be lower than the amount already paid." },
+        { status: 400 }
+      );
+    }
 
+    await cancelOpenBalancePaymentLinks(id);
     await prisma.registration.update({
       where: { id },
       data: { amountDue },

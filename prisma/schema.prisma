@@ -21,6 +21,7 @@ model AdminUser {
   role      AdminRole @default(EDITOR)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  paymentLinks PaymentLink[]
 
   @@map("admin_users")
 }
@@ -117,6 +118,11 @@ model RetreatPackage {
   isActive      Boolean        @default(true)
   sortOrder     Int            @default(0)
   registrations Registration[]
+  stripeProductId      String?  @unique
+  stripeDepositPriceId String?  @unique
+  stripeFullPriceId    String?  @unique
+  stripeSyncedAt       DateTime?
+  stripeSyncError      String?  @db.Text
 
   @@map("retreat_packages")
 }
@@ -158,9 +164,15 @@ model Registration {
   // Payment
   paymentType     PaymentType        @default(FULL)
   payments        Payment[]
+  paymentLinks    PaymentLink[]
   stripeSessionId String?
+  stripeCustomerId String?
   amountDue       Int
   amountPaid      Int                @default(0)
+  inventoryStatus InventoryStatus    @default(HELD)
+  holdExpiresAt   DateTime?
+  termsAcceptedAt DateTime?
+  termsVersion    String?
 
   // Staff
   isStaff         Boolean            @default(false)
@@ -188,6 +200,12 @@ enum PaymentType {
   FULL
 }
 
+enum InventoryStatus {
+  HELD
+  CONFIRMED
+  RELEASED
+}
+
 enum RoomingPreference {
   SOLO
   WITH_FRIEND
@@ -200,10 +218,17 @@ model Payment {
   registration    Registration  @relation(fields: [registrationId], references: [id])
   status          PaymentStatus @default(PENDING)
   method          PaymentMethod @default(STRIPE)
-  amount          Int
+  kind            PaymentKind   @default(BALANCE)
+  amount          Int           // ILS credit in agorot
   currency        String        @default("ILS")
-  stripePaymentId String?
-  stripeSessionId String?
+  chargedAmount   Int?
+  chargedCurrency String?
+  exchangeRate    Decimal?      @db.Decimal(18, 9)
+  exchangeRateSource String?
+  exchangeRateQuotedAt DateTime?
+  stripeFxQuoteId String?
+  stripePaymentId String?       @unique
+  stripeSessionId String?       @unique
   notes           String?
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
@@ -223,8 +248,49 @@ enum PaymentStatus {
 enum PaymentMethod {
   STRIPE
   BANK_TRANSFER
+  BIT
   CASH
   OTHER
+}
+
+enum PaymentKind {
+  DEPOSIT
+  FULL
+  BALANCE
+  ADJUSTMENT
+}
+
+model PaymentLink {
+  id              String            @id @default(cuid())
+  token           String            @unique
+  registrationId  String
+  registration    Registration      @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  createdById     String?
+  createdBy       AdminUser?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  kind            PaymentKind
+  status          PaymentLinkStatus @default(OPEN)
+  amount          Int               // ILS credit in agorot
+  currency        String            @default("ILS")
+  chargedAmount   Int?
+  chargedCurrency String?
+  exchangeRate    Decimal?          @db.Decimal(18, 9)
+  exchangeRateSource String?
+  exchangeRateQuotedAt DateTime?
+  stripeFxQuoteId String?
+  stripeSessionId String?           @unique
+  expiresAt       DateTime
+  paidAt          DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@map("payment_links")
+}
+
+enum PaymentLinkStatus {
+  OPEN
+  PAID
+  EXPIRED
+  CANCELED
 }
 
 // ─────────────────────────────────────────────────────
@@ -331,6 +397,18 @@ model MailingListSubscriber {
   createdAt DateTime @default(now())
 
   @@map("mailing_list_subscribers")
+}
+
+// ─────────────────────────────────────────────────────
+// SITE SETTINGS
+// ─────────────────────────────────────────────────────
+
+model SiteSettings {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
 }
 
 // ─────────────────────────────────────────────────────

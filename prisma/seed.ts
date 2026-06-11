@@ -171,7 +171,7 @@ async function main() {
     {
       category: "Booking & Payment", sortOrder: 0,
       question: "Can I pay a deposit to secure my place?",
-      answer: "Yes. You may secure your place with a deposit at the time of registration. The remaining balance is due 30 days before the retreat start date. Full payment is also accepted at registration.",
+      answer: "Yes. You may secure your place with a deposit at the time of registration. The remaining balance is due at the end of the retreat. You may also pay in full at registration. Card payments can be made in ILS or USD.",
     },
     {
       category: "Booking & Payment", sortOrder: 1,

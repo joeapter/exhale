@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { formatCurrency } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "EXHALE Desert Escape — June 7–9",
+  title: "EXHALE Desert Escape",
   description:
-    "A women-only desert retreat at Noor Glamping, Israel. June 7–9. Two nights of real rest, beautiful food, and open sky.",
+    "A women-only desert retreat in Israel. Real rest, beautiful food, and open sky.",
 };
 
 function formatRetreatDates(start: Date, end: Date) {
@@ -23,15 +23,19 @@ function nightsBetween(start: Date, end: Date) {
 }
 
 export default async function RetreatPage() {
-  const retreat = await prisma.retreat.findUnique({
-    where: { slug: "exhale-desert-escape" },
+  const retreat = await prisma.retreat.findFirst({
+    where: {
+      status: { in: ["PUBLISHED", "SOLD_OUT"] },
+      startDate: { gt: new Date() },
+    },
+    orderBy: { startDate: "asc" },
     include: {
       packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } },
       faqs: { orderBy: { sortOrder: "asc" } },
     },
   });
 
-  if (!retreat) notFound();
+  if (!retreat) redirect("/retreats");
 
   const lowestPrice = Math.min(...retreat.packages.map((p) => p.fullPrice));
   const dates = formatRetreatDates(retreat.startDate, retreat.endDate);

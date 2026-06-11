@@ -13,7 +13,7 @@ const sections = [
   },
   {
     title: "Payment",
-    body: `All prices are quoted in ILS (New Israeli Shekel) and are inclusive of VAT where applicable. When booking with a deposit, the remaining balance is due no later than 30 days before the retreat start date. Failure to settle the balance by the due date may result in cancellation of your booking without refund of the deposit.`,
+    body: `All retreat prices and balances are quoted and accounted for in ILS (New Israeli Shekel) and are inclusive of VAT where applicable. Card payments may be made in ILS or in USD using the exchange rate quoted and fixed for that individual payment. When booking with a deposit, the remaining balance is due at the end of the retreat and may be paid by card, Bit, bank transfer, cash, or another method agreed with EXHALE.`,
   },
   {
     title: "Cancellation by You",
@@ -100,7 +100,7 @@ export default function TermsPage() {
               color: "var(--color-taupe-light)",
             }}
           >
-            Last updated: April 2025
+            Last updated: June 2026
           </p>
         </div>
       </section>

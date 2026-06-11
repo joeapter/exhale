@@ -1,64 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
+import type Stripe from "stripe";
+import { expirePaymentLink, fulfillCheckoutSession } from "@/lib/payment-links";
 import { prisma } from "@/lib/prisma";
+import { getStripe } from "@/lib/stripe";
 
 export default async function handler(req: NextRequest) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2026-03-25.dahlia",
-  });
-
   const body = await req.text();
-  const sig = req.headers.get("stripe-signature")!;
-
-  let event: Stripe.Event;
-
-  try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
-  } catch (err) {
-    console.error("Webhook signature verification failed:", err);
-    return NextResponse.json({ error: "Webhook error" }, { status: 400 });
+  const signature = req.headers.get("stripe-signature");
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!signature || !webhookSecret) {
+    return NextResponse.json({ error: "Webhook is not configured." }, { status: 503 });
   }
 
-  if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const registrationId = session.metadata?.registrationId;
+  let event: Stripe.Event;
+  try {
+    event = getStripe().webhooks.constructEvent(body, signature, webhookSecret);
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err);
+    return NextResponse.json({ error: "Invalid webhook signature." }, { status: 400 });
+  }
 
-    if (!registrationId) {
-      return NextResponse.json({ error: "No registration ID" }, { status: 400 });
+  try {
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded"
+    ) {
+      await fulfillCheckoutSession(event.data.object);
     }
 
-    const amountPaid = session.amount_total ?? 0;
-
-    const registration = await prisma.registration.update({
-      where: { id: registrationId },
-      data: { status: "CONFIRMED", confirmedAt: new Date(), amountPaid, stripeSessionId: session.id },
-      include: { retreat: true, package: true },
-    });
-
-    await prisma.payment.create({
-      data: {
-        registrationId,
-        status: "PAID",
-        method: "STRIPE",
-        amount: amountPaid,
-        currency: session.currency?.toUpperCase() ?? "ILS",
-        stripeSessionId: session.id,
-        stripePaymentId: session.payment_intent as string,
-        paidAt: new Date(),
-      },
-    });
-
-    await prisma.$transaction([
-      prisma.retreat.update({ where: { id: registration.retreatId }, data: { spotsRemaining: { decrement: 1 } } }),
-      ...(registration.packageId
-        ? [prisma.retreatPackage.update({ where: { id: registration.packageId }, data: { available: { decrement: 1 } } })]
-        : []),
-    ]);
-
-    const updatedRetreat = await prisma.retreat.findUnique({ where: { id: registration.retreatId } });
-    if (updatedRetreat && updatedRetreat.spotsRemaining <= 0) {
-      await prisma.retreat.update({ where: { id: registration.retreatId }, data: { status: "SOLD_OUT" } });
+    if (event.type === "checkout.session.expired") {
+      const session = event.data.object;
+      const link = await prisma.paymentLink.findFirst({
+        where: {
+          OR: [
+            { stripeSessionId: session.id },
+            ...(session.metadata?.paymentLinkId
+              ? [{ id: session.metadata.paymentLinkId }]
+              : []),
+          ],
+        },
+        select: { id: true },
+      });
+      if (link) await expirePaymentLink(link.id);
     }
+  } catch (err) {
+    console.error(`Stripe webhook ${event.id} failed:`, err);
+    return NextResponse.json({ error: "Webhook processing failed." }, { status: 500 });
   }
 
   return NextResponse.json({ received: true });

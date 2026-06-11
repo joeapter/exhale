@@ -39,7 +39,8 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
   const [selectedPackage, setSelectedPackage] = useState<string>(
     retreat.packages[0]?.id ?? ""
   );
-  const paymentType = "DEPOSIT" as const;
+  const [paymentType, setPaymentType] = useState<"DEPOSIT" | "FULL">("DEPOSIT");
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const [form, setForm] = useState({
     firstName: "",
@@ -92,6 +93,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
           retreatId: retreat.id,
           packageId: selectedPackage,
           paymentType,
+          termsAccepted,
           ...form,
         }),
       });
@@ -102,8 +104,8 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
         throw new Error(data.error ?? "Something went wrong. Please try again.");
       }
 
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl;
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -426,7 +428,8 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   color: "var(--color-taupe)",
                 }}
               >
-                Deposit due after reservation: {formatCurrency(pkg.depositAmount)}
+                Choose a {formatCurrency(pkg.depositAmount)} deposit or pay the full amount.
+                Any remaining balance is due at the end of the retreat.
               </p>
             )}
 
@@ -725,6 +728,40 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   style={{ ...fieldStyle, resize: "none" as const }}
                 />
               </div>
+
+              <div>
+                <div style={labelStyle}>Payment choice</div>
+                <div className="grid sm:grid-cols-2 gap-3 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setPaymentType("DEPOSIT")}
+                    className="p-4 text-left border"
+                    style={{
+                      borderColor: paymentType === "DEPOSIT" ? "var(--color-clay)" : "rgba(184,144,128,0.3)",
+                      background: paymentType === "DEPOSIT" ? "rgba(250,247,242,0.9)" : "transparent",
+                    }}
+                  >
+                    <span className="label-sm text-[#9B8F84] block mb-1">Pay deposit now</span>
+                    <span className="serif text-2xl">{pkg ? formatCurrency(pkg.depositAmount) : ""}</span>
+                    <span className="block mt-1 text-xs text-[#9B8F84]">
+                      Balance due at the end of the retreat
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPaymentType("FULL")}
+                    className="p-4 text-left border"
+                    style={{
+                      borderColor: paymentType === "FULL" ? "var(--color-clay)" : "rgba(184,144,128,0.3)",
+                      background: paymentType === "FULL" ? "rgba(250,247,242,0.9)" : "transparent",
+                    }}
+                  >
+                    <span className="label-sm text-[#9B8F84] block mb-1">Pay in full now</span>
+                    <span className="serif text-2xl">{pkg ? formatCurrency(pkg.fullPrice) : ""}</span>
+                    <span className="block mt-1 text-xs text-[#9B8F84]">No balance at retreat</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Summary — minimal, no box */}
@@ -766,7 +803,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   style={{ borderTop: "1px solid rgba(184,144,128,0.2)" }}
                 >
                   <span style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.9375rem", color: "var(--color-espresso)" }}>
-                    Deposit due
+                    {paymentType === "DEPOSIT" ? "Deposit due now" : "Full payment due now"}
                   </span>
                   <span style={{ fontFamily: "Cormorant Garamond, Georgia, serif", fontWeight: 300, fontSize: "1.375rem", color: "var(--color-espresso)" }}>
                     {formatCurrency(amountDue)}
@@ -774,6 +811,20 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                 </div>
               </div>
             </div>
+
+            <label className="flex items-start gap-3 mb-6 text-sm text-[#7A6A5A]">
+              <input
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(event) => setTermsAccepted(event.target.checked)}
+                required
+                className="mt-1"
+              />
+              <span>
+                I agree to the <a href="/terms" target="_blank" className="underline">booking terms</a>,
+                including that any remaining balance is due at the end of the retreat.
+              </span>
+            </label>
 
             {error && (
               <p
@@ -804,7 +855,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !termsAccepted}
                 className="flex-[2] py-4 transition-all duration-300 uppercase disabled:opacity-60"
                 style={{
                   fontFamily: "Jost, system-ui, sans-serif",
@@ -817,7 +868,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
                   cursor: loading ? "not-allowed" : "pointer",
                 }}
               >
-                {loading ? "Submitting…" : "Reserve Now"}
+                {loading ? "Preparing payment…" : "Continue to secure payment"}
               </button>
             </div>
 
@@ -825,7 +876,7 @@ export default function RegistrationForm({ retreat }: { retreat: Retreat }) {
               className="mt-4 text-center"
               style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}
             >
-              After reserving, you&apos;ll see deposit payment details.
+              You&apos;ll choose ILS or USD and enter your card on the secure EXHALE payment page.
             </p>
           </div>
         )}

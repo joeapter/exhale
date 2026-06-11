@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatDateRange } from "@/lib/utils";
+import SyncStripeButton from "@/components/admin/SyncStripeButton";
 
 export default async function AdminRetreatsPage() {
   const session = await getAdminSession();
@@ -10,7 +11,12 @@ export default async function AdminRetreatsPage() {
 
   const retreats = await prisma.retreat.findMany({
     orderBy: { startDate: "asc" },
-    include: { _count: { select: { registrations: true } } },
+    include: {
+      _count: { select: { registrations: true } },
+      packages: {
+        select: { stripeSyncedAt: true, stripeSyncError: true },
+      },
+    },
   });
 
   const statusColor: Record<string, string> = {
@@ -54,7 +60,7 @@ export default async function AdminRetreatsPage() {
         <table className="w-full">
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(228,216,201,0.8)" }}>
-              {["Title", "Dates", "Location", "Status", "Spots", "Actions"].map((col) => (
+              {["Title", "Dates", "Location", "Status", "Spots", "Stripe", "Actions"].map((col) => (
                 <th key={col} className="text-left px-5 py-3.5 label-sm text-[#9B8F84]">{col}</th>
               ))}
             </tr>
@@ -62,7 +68,7 @@ export default async function AdminRetreatsPage() {
           <tbody>
             {retreats.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-5 py-10 text-center" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe-light)" }}>
+                <td colSpan={7} className="px-5 py-10 text-center" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe-light)" }}>
                   No retreats yet. Create your first one.
                 </td>
               </tr>
@@ -92,6 +98,22 @@ export default async function AdminRetreatsPage() {
                 </td>
                 <td className="px-5 py-4" style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.875rem", color: "var(--color-taupe)" }}>
                   {r.spotsRemaining} / {r.capacity}
+                </td>
+                <td className="px-5 py-4">
+                  {r.status === "PUBLISHED" ? (
+                    <div>
+                      <p className="text-xs text-[#9B8F84]">
+                        {r.packages.some((pkg) => pkg.stripeSyncError)
+                          ? "Sync error"
+                          : r.packages.length > 0 && r.packages.every((pkg) => pkg.stripeSyncedAt)
+                            ? "Synced"
+                            : "Not synced"}
+                      </p>
+                      <SyncStripeButton retreatId={r.id} />
+                    </div>
+                  ) : (
+                    <span className="text-xs text-[#9B8F84]">On publish</span>
+                  )}
                 </td>
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-4">

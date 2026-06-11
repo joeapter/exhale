@@ -11,8 +11,8 @@ export function formatCurrency(agorot: number, currency = "ILS"): string {
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
     currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: currency === "ILS" ? 0 : 2,
+    maximumFractionDigits: currency === "ILS" ? 0 : 2,
   }).format(amount);
 }
 

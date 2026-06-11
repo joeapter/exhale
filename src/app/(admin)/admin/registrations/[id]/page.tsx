@@ -7,6 +7,7 @@ import MarkDepositPaidButton from "@/components/admin/MarkDepositPaidButton";
 import MarkPaidFullButton from "@/components/admin/MarkPaidFullButton";
 import MarkStaffButton from "@/components/admin/MarkStaffButton";
 import DeleteRegistrationButton from "@/components/admin/DeleteRegistrationButton";
+import CollectBalancePanel from "@/components/admin/CollectBalancePanel";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -46,7 +47,11 @@ export default async function RegistrationDetailPage({ params }: Props) {
           id: true,
           status: true,
           method: true,
+          kind: true,
           amount: true,
+          chargedAmount: true,
+          chargedCurrency: true,
+          exchangeRate: true,
           paidAt: true,
           createdAt: true,
           notes: true,
@@ -62,6 +67,7 @@ export default async function RegistrationDetailPage({ params }: Props) {
   const statusLabel: Record<string, string> = {
     CONFIRMED: "RESERVED",
   };
+  const outstandingBalance = Math.max(registration.amountDue - registration.amountPaid, 0);
 
   return (
     <div className="max-w-[1200px] mx-auto px-6 py-10">
@@ -209,6 +215,12 @@ export default async function RegistrationDetailPage({ params }: Props) {
                 {formatCurrency(registration.amountDue)}
               </span>
             </p>
+            <p style={{ color: "var(--color-taupe)" }}>
+              Balance:{" "}
+              <span style={{ color: "var(--color-espresso)" }}>
+                {formatCurrency(outstandingBalance)}
+              </span>
+            </p>
           </div>
         </section>
 
@@ -234,6 +246,21 @@ export default async function RegistrationDetailPage({ params }: Props) {
           </div>
         </section>
       </div>
+
+      {!registration.isStaff &&
+        registration.status !== "CANCELED" &&
+        registration.status !== "REFUNDED" && (
+          <section
+            className="mt-5 p-5"
+            style={{ background: "#FAF7F2", border: "1px solid rgba(228,216,201,0.8)" }}
+          >
+            <h2 className="label-sm text-[#9B8F84] mb-3">Collect Balance</h2>
+            <CollectBalancePanel
+              registrationId={registration.id}
+              balance={outstandingBalance}
+            />
+          </section>
+        )}
 
       <section
         className="mt-5 p-5"
@@ -279,8 +306,14 @@ export default async function RegistrationDetailPage({ params }: Props) {
                 style={{ border: "1px solid rgba(228,216,201,0.8)", background: "rgba(255,255,255,0.65)" }}
               >
                 <p style={{ fontFamily: "Jost", fontWeight: 400, fontSize: "0.8125rem", color: "var(--color-espresso)" }}>
-                  {payment.status} · {payment.method} · {formatCurrency(payment.amount)}
+                  {payment.status} · {payment.kind} · {payment.method} · {formatCurrency(payment.amount)}
                 </p>
+                {payment.chargedAmount && payment.chargedCurrency && (
+                  <p style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe)" }}>
+                    Charged {formatCurrency(payment.chargedAmount, payment.chargedCurrency)}
+                    {payment.exchangeRate ? ` · rate ${payment.exchangeRate.toString()}` : ""}
+                  </p>
+                )}
                 <p style={{ fontFamily: "Jost", fontWeight: 300, fontSize: "0.75rem", color: "var(--color-taupe-light)" }}>
                   {payment.paidAt
                     ? `Paid ${formatDate(payment.paidAt)}`

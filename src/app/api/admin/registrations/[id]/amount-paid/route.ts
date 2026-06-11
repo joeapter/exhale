@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cancelOpenBalancePaymentLinks } from "@/lib/payment-links";
 
 export async function PATCH(
   req: NextRequest,
@@ -27,16 +28,39 @@ export async function PATCH(
   try {
     const registration = await prisma.registration.findUnique({
       where: { id },
-      select: { id: true, amountDue: true },
+      select: { id: true, amountDue: true, amountPaid: true },
     });
 
     if (!registration) {
       return NextResponse.json({ error: "Registration not found." }, { status: 404 });
     }
+    if (amountPaid > registration.amountDue) {
+      return NextResponse.json(
+        { error: "Amount paid cannot exceed the amount due." },
+        { status: 400 }
+      );
+    }
 
-    await prisma.registration.update({
-      where: { id },
-      data: { amountPaid },
+    const adjustment = amountPaid - registration.amountPaid;
+    await cancelOpenBalancePaymentLinks(id);
+    await prisma.$transaction(async (tx) => {
+      await tx.registration.update({
+        where: { id },
+        data: { amountPaid },
+      });
+      if (adjustment !== 0) {
+        await tx.payment.create({
+          data: {
+            registrationId: id,
+            status: "PAID",
+            method: "OTHER",
+            kind: "ADJUSTMENT",
+            amount: adjustment,
+            notes: `Admin adjusted total amount paid from ${registration.amountPaid} to ${amountPaid} agorot.`,
+            paidAt: new Date(),
+          },
+        });
+      }
     });
 
     return NextResponse.json({ success: true, amountPaid });

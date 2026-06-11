@@ -141,8 +141,14 @@ Add the webhook signing secret to `.env.local` as `STRIPE_WEBHOOK_SECRET`.
 ### Production
 
 In Stripe Dashboard → Developers → Webhooks, add:
-- Endpoint: `https://exhale.co.il/api/stripe/webhook`
-- Event: `checkout.session.completed`
+- Endpoint: `https://www.exhale.co.il/api/stripe/webhook`
+- Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, and `checkout.session.expired`
+
+Published retreat packages are synchronized to Stripe Products with ILS deposit
+and full-payment Prices. Customer and admin-generated payment links use the
+branded `/pay/[token]` flow. Every payment credits a fixed ILS amount; customers
+can charge their card in ILS or USD. USD amounts use a fresh Stripe FX quote and
+store the rate, source, timestamp, charged amount, and ILS credit in the ledger.
 
 ---
 

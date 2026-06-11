@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { formatDateRange, retreatNights, formatCurrency } from "@/lib/utils";
+import { retreatNights, formatCurrency } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Retreats",
@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 
 export default async function RetreatsPage() {
   const retreats = await prisma.retreat.findMany({
-    where: { status: { in: ["PUBLISHED", "SOLD_OUT"] } },
+    where: {
+      status: { in: ["PUBLISHED", "SOLD_OUT"] },
+      startDate: { gt: new Date() },
+    },
     include: { packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } } },
     orderBy: { startDate: "asc" },
   });
@@ -39,7 +42,7 @@ export default async function RetreatsPage() {
         >
           <div className="flex items-center gap-3 mb-7">
             <span className="h-px w-5 block" style={{ background: "rgba(184,144,128,0.6)" }} />
-            <span className="label-sm text-[#B89080]">2026 Season</span>
+            <span className="label-sm text-[#B89080]">Upcoming</span>
           </div>
           <h1
             style={{
@@ -103,7 +106,7 @@ export default async function RetreatsPage() {
             </div>
           ) : (
             <div className="space-y-0">
-              {retreats.map((retreat, i) => {
+              {retreats.map((retreat) => {
                 const isSoldOut = retreat.status === "SOLD_OUT" || retreat.spotsRemaining === 0;
                 const nights = retreatNights(retreat.startDate, retreat.endDate);
                 const lowestPrice = retreat.packages.length > 0

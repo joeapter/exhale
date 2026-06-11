@@ -19,13 +19,13 @@ export default async function RegisterPage({ params }: Props) {
     where: { slug: retreatSlug },
     include: {
       packages: {
-        where: { available: { gt: 0 } },
+        where: { isActive: true, available: { gt: 0 } },
         orderBy: { sortOrder: "asc" },
       },
     },
   });
 
-  if (!retreat || retreat.status === "SOLD_OUT" || retreat.status === "CANCELED") {
+  if (!retreat || retreat.status !== "PUBLISHED" || retreat.startDate <= new Date()) {
     notFound();
   }
 
@@ -154,7 +154,7 @@ export default async function RegisterPage({ params }: Props) {
                 lineHeight: 1.75,
               }}
             >
-              Your place is secured with a deposit. The remaining balance is due 30 days before the retreat.
+              Pay a deposit or the full amount when you register. Any remaining balance is due at the end of the retreat.
             </p>
             {retreat.spotsRemaining <= 5 && (
               <p

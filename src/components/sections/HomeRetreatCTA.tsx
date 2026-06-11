@@ -1,6 +1,16 @@
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { formatDateRange, retreatNights } from "@/lib/utils";
 
-export default function HomeRetreatCTA() {
+export default async function HomeRetreatCTA() {
+  const retreat = await prisma.retreat.findFirst({
+    where: {
+      status: { in: ["PUBLISHED", "SOLD_OUT"] },
+      startDate: { gt: new Date() },
+    },
+    orderBy: { startDate: "asc" },
+    select: { title: true, location: true, startDate: true, endDate: true },
+  });
   return (
     <section
       className="relative overflow-hidden grain-overlay"
@@ -41,9 +51,11 @@ export default function HomeRetreatCTA() {
               marginBottom: "1.25rem",
             }}
           >
-            EXHALE
+            {retreat?.title ?? "EXHALE"}
             <br />
-            <em style={{ fontStyle: "italic", opacity: 0.85 }}>Desert Escape</em>
+            <em style={{ fontStyle: "italic", opacity: 0.85 }}>
+              {retreat ? "Your next retreat" : "New dates coming soon"}
+            </em>
           </h2>
 
           <p
@@ -56,7 +68,9 @@ export default function HomeRetreatCTA() {
               marginBottom: "0.5rem",
             }}
           >
-            June 7–9 &nbsp;·&nbsp; 2 nights &nbsp;·&nbsp; Noor Glamping, Israel
+            {retreat
+              ? `${formatDateRange(retreat.startDate, retreat.endDate)} · ${retreatNights(retreat.startDate, retreat.endDate)} nights · ${retreat.location}`
+              : "Join the mailing list or contact us for the next dates."}
           </p>
 
           <p
@@ -69,12 +83,12 @@ export default function HomeRetreatCTA() {
               marginBottom: "3rem",
             }}
           >
-            A small group of women. Limited places.
+            {retreat ? "A small group of women. Limited places." : "A few days to rest, reconnect, and exhale."}
           </p>
 
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-4">
             <Link
-              href="/retreat"
+              href={retreat ? "/retreat" : "/retreats"}
               style={{
                 fontFamily: "Jost, system-ui, sans-serif",
                 fontWeight: 400,
@@ -87,7 +101,7 @@ export default function HomeRetreatCTA() {
                 transition: "border-color 0.3s ease",
               }}
             >
-              Reserve a place
+              {retreat ? "Reserve a place" : "Explore retreats"}
             </Link>
             <Link
               href="/retreat"

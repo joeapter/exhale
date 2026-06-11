@@ -54,6 +54,8 @@ export async function POST(
           status: "CONFIRMED",
           confirmedAt: new Date(),
           amountPaid: newAmountPaid,
+          inventoryStatus: "CONFIRMED",
+          holdExpiresAt: null,
         },
       });
 
@@ -63,6 +65,7 @@ export async function POST(
             registrationId: registration.id,
             status: "PAID",
             method: "OTHER",
+            kind: "DEPOSIT",
             amount: paymentToAdd,
             notes: ADMIN_DEPOSIT_PAID_NOTE,
             paidAt: new Date(),

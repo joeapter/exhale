@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/facilitators", label: "Facilitators" },
   { href: "/admin/faqs", label: "FAQs" },
   { href: "/admin/testimonials", label: "Testimonials" },
+  { href: "/admin/theme", label: "Theme" },
 ];
 
 export default function AdminNav() {

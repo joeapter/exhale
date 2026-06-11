@@ -13,6 +13,71 @@ const transporter = nodemailer.createTransport({
 const FROM = `EXHALE <${process.env.SMTP_USER ?? "booking@exhale.co.il"}>`;
 const ADMIN = process.env.EMAIL_TO ?? "booking@exhale.co.il";
 
+function formatPaymentAmount(amount: number, currency: string) {
+  return new Intl.NumberFormat(currency === "ILS" ? "he-IL" : "en-US", {
+    style: "currency",
+    currency,
+    minimumFractionDigits: currency === "ILS" ? 0 : 2,
+    maximumFractionDigits: currency === "ILS" ? 0 : 2,
+  }).format(amount / 100);
+}
+
+export async function sendPaymentConfirmation(data: {
+  firstName: string;
+  email: string;
+  retreatTitle: string;
+  packageName?: string | null;
+  confirmationRef?: string | null;
+  chargedAmount: number;
+  chargedCurrency: string;
+  ilsCredit: number;
+  balanceIls: number;
+}) {
+  await transporter.sendMail({
+    from: FROM,
+    to: data.email,
+    subject: `Payment received — ${data.retreatTitle}`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 560px; margin: 0 auto; color: #3D2E22;">
+        <p style="font-size: 1.5rem; font-weight: 300;">${data.firstName},</p>
+        <p style="line-height: 1.8;">We received your payment of <strong>${formatPaymentAmount(data.chargedAmount, data.chargedCurrency)}</strong> for ${data.retreatTitle}.</p>
+        <p style="line-height: 1.8;">
+          <strong>Package:</strong> ${data.packageName ?? "Retreat reservation"}<br>
+          <strong>ILS credit:</strong> ${formatPaymentAmount(data.ilsCredit, "ILS")}<br>
+          <strong>Reference:</strong> ${data.confirmationRef ?? "—"}<br>
+          <strong>Remaining balance:</strong> ${formatPaymentAmount(data.balanceIls, "ILS")}
+        </p>
+        ${data.balanceIls > 0 ? '<p style="line-height: 1.8;">Your remaining balance is due at the end of the retreat.</p>' : '<p style="line-height: 1.8;">Your reservation is paid in full.</p>'}
+        <p style="line-height: 1.8;">— The EXHALE Team</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPaymentNotification(data: {
+  name: string;
+  retreatTitle: string;
+  chargedAmount: number;
+  chargedCurrency: string;
+  ilsCredit: number;
+  balanceIls: number;
+  registrationId: string;
+}) {
+  await transporter.sendMail({
+    from: FROM,
+    to: ADMIN,
+    subject: `Payment received: ${data.name} — ${data.retreatTitle}`,
+    html: `
+      <div style="font-family: monospace; max-width: 560px; margin: 0 auto; color: #3D2E22;">
+        <h2 style="font-family: Georgia, serif; font-weight: 300;">Payment received</h2>
+        <p>${data.name} paid <strong>${formatPaymentAmount(data.chargedAmount, data.chargedCurrency)}</strong>.</p>
+        <p>ILS credit: ${formatPaymentAmount(data.ilsCredit, "ILS")}<br>Remaining balance: ${formatPaymentAmount(data.balanceIls, "ILS")}</p>
+        <p><a href="${process.env.NEXT_PUBLIC_URL ?? "https://www.exhale.co.il"}/admin/registrations/${data.registrationId}">Open registration</a></p>
+      </div>
+    `,
+  });
+}
+
 // ── Registration: confirmation to guest ───────────────────────────────────────
 export async function sendRegistrationConfirmation(data: {
   firstName: string;
@@ -39,7 +104,7 @@ export async function sendRegistrationConfirmation(data: {
           ${data.firstName},
         </p>
         <p style="line-height: 1.8; margin-bottom: 1rem;">
-          Your place at <strong>EXHALE Desert Escape</strong> (June 7–9, Noor Glamping) is reserved.
+          Your place at <strong>EXHALE</strong> is reserved.
         </p>
         <p style="line-height: 1.8; margin-bottom: 1rem;">
           <strong>Package:</strong> ${data.packageName}<br>
@@ -47,7 +112,7 @@ export async function sendRegistrationConfirmation(data: {
           <strong>Reference:</strong> ${data.confirmationRef}
         </p>
         <p style="line-height: 1.8; margin-bottom: 1rem;">
-          We'll be in touch shortly with arrival details, a packing list, and everything you need to know before June.
+          We'll be in touch shortly with arrival details, a packing list, and everything you need to know.
         </p>
         <p style="line-height: 1.8; margin-bottom: 2rem;">
           If you have any questions in the meantime, reply to this email or reach us at booking@exhale.co.il.

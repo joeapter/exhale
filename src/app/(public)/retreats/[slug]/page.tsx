@@ -31,7 +31,10 @@ export default async function RetreatDetailPage({ params }: Props) {
 
   if (!retreat || retreat.status === "DRAFT") notFound();
 
-  const isSoldOut = retreat.status === "SOLD_OUT" || retreat.spotsRemaining === 0;
+  const isSoldOut =
+    retreat.status !== "PUBLISHED" ||
+    retreat.spotsRemaining === 0 ||
+    retreat.startDate <= new Date();
   const nights = retreatNights(retreat.startDate, retreat.endDate);
   const itinerary = (retreat.itinerary as ItineraryDay[] | null) ?? [];
 
@@ -444,9 +447,9 @@ export default async function RetreatDetailPage({ params }: Props) {
                       color: "var(--color-taupe-light)",
                     }}
                   >
-                    Secure your place with a deposit.
+                    Secure your place with a deposit or pay in full.
                     <br />
-                    Full payment due 30 days before arrival.
+                    Any remaining balance is due at the end of the retreat.
                   </p>
                 </>
               )}

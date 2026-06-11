@@ -36,7 +36,13 @@ export async function POST(
     await prisma.$transaction(async (tx) => {
       await tx.registration.update({
         where: { id },
-        data: { status: "CONFIRMED", confirmedAt: new Date(), amountPaid: registration.amountDue },
+        data: {
+          status: "CONFIRMED",
+          confirmedAt: new Date(),
+          amountPaid: registration.amountDue,
+          inventoryStatus: "CONFIRMED",
+          holdExpiresAt: null,
+        },
       });
 
       await tx.payment.create({
@@ -44,6 +50,7 @@ export async function POST(
           registrationId: id,
           status: "PAID",
           method: "OTHER",
+          kind: "BALANCE",
           amount: remaining,
           notes: ADMIN_PAID_FULL_NOTE,
           paidAt: new Date(),

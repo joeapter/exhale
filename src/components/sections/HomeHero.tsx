@@ -6,7 +6,13 @@ import Image from "next/image";
 
 const HERO_IMAGE = "/assets/desert-glamping-at-sunset.png";
 
-export default function HomeHero() {
+export default function HomeHero({
+  retreatEyebrow,
+  hasUpcomingRetreat,
+}: {
+  retreatEyebrow: string;
+  hasUpcomingRetreat: boolean;
+}) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -65,7 +71,7 @@ export default function HomeHero() {
             className="label-sm mb-10"
             style={{ color: "rgba(228,210,185,0.65)" }}
           >
-            June 7–9 &nbsp;·&nbsp; Noor Glamping &nbsp;·&nbsp; Israel
+            {retreatEyebrow}
           </p>
 
           {/* Main headline */}
@@ -126,7 +132,7 @@ export default function HomeHero() {
                 transition: "border-color 0.3s ease",
               }}
             >
-              Reserve a place
+              {hasUpcomingRetreat ? "Reserve a place" : "Explore retreats"}
             </Link>
             <Link
               href="/about"

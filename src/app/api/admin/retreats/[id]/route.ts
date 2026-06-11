@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { after } from "next/server";
+import { syncRetreatToStripe } from "@/lib/stripe-catalog";
+import { revalidateRetreatPages } from "@/lib/retreat-cache";
 
 const packageSchema = z.object({
   id: z.string(),
@@ -44,7 +47,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const body = await req.json();
     const data = schema.parse(body);
 
-    await prisma.retreat.update({
+    const retreat = await prisma.retreat.update({
       where: { id },
       data: {
         title: data.title,
@@ -82,6 +85,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           },
         });
       }
+    }
+
+    revalidateRetreatPages(retreat.slug);
+    if (retreat.status === "PUBLISHED") {
+      after(async () => {
+        try {
+          await syncRetreatToStripe(retreat.id);
+        } catch (err) {
+          console.error("Background Stripe catalog sync failed:", err);
+        }
+      });
     }
 
     return NextResponse.json({ success: true });

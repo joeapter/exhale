@@ -67,7 +67,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
           }}
         >
           Your reservation has been received. To confirm your unit, please send
-          the deposit to our booking contact below.
+          complete the secure payment page provided during registration.
         </p>
 
         {ref && (
@@ -119,7 +119,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
               +972-58-728-0062
             </a>
             <br />
-            Payment methods: Bit or Bank Transfer
+            Payment methods: card in ILS or USD
           </p>
         </div>
 
@@ -133,7 +133,7 @@ export default async function ConfirmationPage({ searchParams }: Props) {
             marginBottom: "3rem",
           }}
         >
-          Reservation is not confirmed until deposit has been paid. Once received,
+          Reservation is not confirmed until the selected payment has been received. Once received,
           we will mark your reservation as reserved and send final details.
         </p>
 

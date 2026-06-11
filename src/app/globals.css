@@ -29,6 +29,96 @@
   --ease-gentle: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ─── Forest theme overrides ─── */
+/* All CSS vars cascade to children of [data-theme="forest"] */
+[data-theme="forest"] {
+  /* ── Core palette ── */
+  --color-linen:       #151911;
+  --color-sand:        #1A2216;
+  --color-dune:        #20301C;
+  --color-stone:       #3A5030;
+  --color-clay:        #7A9466;
+  --color-smoke:       #0D1210;
+  --color-mist:        #121A0E;
+  --color-espresso:    #F0EBE0;
+  --color-taupe:       #B8B0A0;
+  --color-taupe-light: #9B9690;
+  --color-candle:      #C8922A;
+  --color-warm-white:  #F5F0E8;
+
+  /* ── Tailwind v4 extended color tokens ── */
+  /* Sand scale → dark forest backgrounds */
+  --color-sand-50:     #101410;
+  --color-sand-100:    #151911;
+  --color-sand-200:    #1A2216;
+  --color-sand-300:    #1E2B1A;
+  --color-sand-400:    #263520;
+
+  /* Dune scale → deeper forest surfaces */
+  --color-dune-100:    #1C2818;
+  --color-dune-200:    #20301C;
+  --color-dune-300:    #263820;
+  --color-dune-400:    #2E4228;
+
+  /* Stone scale → mossy forest tones */
+  --color-stone-100:   #344828;
+  --color-stone-200:   #3A5030;
+  --color-stone-300:   #506840;
+  --color-stone-400:   #6A8A54;
+
+  /* Clay scale → sage green accents */
+  --color-clay-100:    #8CAE6E;
+  --color-clay-200:    #7A9466;
+  --color-clay-300:    #688056;
+  --color-clay-400:    #566848;
+
+  /* Flat colors */
+  --color-linen:       #151911;
+  --color-smoke:       #0D1210;
+  --color-candle:      #C8922A;
+  --color-warm-white:  #F5F0E8;
+  --color-mist:        #121A0E;
+
+  /* Espresso scale → cream (text inverted) */
+  --color-espresso-light: #C8C0B0;
+  --color-espresso:    #F0EBE0;
+  --color-espresso-deep: #FAF6EE;
+
+  /* Taupe scale → warm grays */
+  --color-taupe-light: #9B9690;
+  --color-taupe:       #B8B0A0;
+  --color-taupe-dark:  #D8D0C0;
+}
+
+/* Forest grain blends better on dark with screen */
+[data-theme="forest"] .grain-overlay::after {
+  mix-blend-mode: screen;
+  opacity: 0.04;
+}
+
+/* Forest selection color */
+[data-theme="forest"] ::selection {
+  background: rgba(122, 148, 102, 0.3);
+  color: #F0EBE0;
+}
+
+/* Forest rule-soft (hardcoded rgba override) */
+[data-theme="forest"] .rule-soft {
+  background: rgba(122, 148, 102, 0.15);
+}
+
+/* Forest form field border */
+[data-theme="forest"] .field-base {
+  border-bottom-color: rgba(122, 148, 102, 0.35);
+  color: #F0EBE0;
+}
+[data-theme="forest"] .field-base:focus {
+  border-bottom-color: #7A9466;
+}
+[data-theme="forest"] .field-base::placeholder {
+  color: #9B9690;
+}
+
 /* ─── Base ─── */
 *, *::before, *::after { box-sizing: border-box; }
 

@@ -19,6 +19,8 @@ export async function DELETE(
       select: {
         id: true,
         retreatId: true,
+        packageId: true,
+        inventoryStatus: true,
       },
     });
 
@@ -48,7 +50,11 @@ export async function DELETE(
         where: { id: registration.id },
       });
 
-      if (retreat && retreat.spotsRemaining < retreat.capacity) {
+      if (
+        registration.inventoryStatus !== "RELEASED" &&
+        retreat &&
+        retreat.spotsRemaining < retreat.capacity
+      ) {
         await tx.retreat.update({
           where: { id: retreat.id },
           data: {
@@ -56,6 +62,19 @@ export async function DELETE(
             ...(retreat.status === "SOLD_OUT" ? { status: "PUBLISHED" as const } : {}),
           },
         });
+      }
+
+      if (registration.inventoryStatus !== "RELEASED" && registration.packageId) {
+        const pkg = await tx.retreatPackage.findUnique({
+          where: { id: registration.packageId },
+          select: { available: true, capacity: true },
+        });
+        if (pkg && pkg.available < pkg.capacity) {
+          await tx.retreatPackage.update({
+            where: { id: registration.packageId },
+            data: { available: { increment: 1 } },
+          });
+        }
       }
     });
 

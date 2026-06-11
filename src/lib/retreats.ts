@@ -8,7 +8,10 @@ export type RetreatWithDetails = Retreat & {
 
 export async function getPublishedRetreats() {
   return prisma.retreat.findMany({
-    where: { status: { in: ["PUBLISHED", "SOLD_OUT"] } },
+    where: {
+      status: { in: ["PUBLISHED", "SOLD_OUT"] },
+      startDate: { gt: new Date() },
+    },
     include: { packages: { where: { isActive: true }, orderBy: { sortOrder: "asc" } }, images: { orderBy: { sortOrder: "asc" } } },
     orderBy: { startDate: "asc" },
   });
