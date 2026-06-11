@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { IMAGE_SLOTS, type ImageSlot } from "@/lib/site-images";
+import { IMAGE_SLOTS, type ImageSlot } from "@/lib/site-image-slots";
 
 // ─── Theme picker ──────────────────────────────────────────────────────────────
 
